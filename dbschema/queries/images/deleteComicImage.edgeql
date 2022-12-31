@@ -1,0 +1,1 @@
+delete ComicImage filter .id = <uuid>$id
