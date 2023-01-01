@@ -36,7 +36,8 @@ function Header() {
             />
           </Link>
         </div>
-          <AccountMenu />
+        <AccountMenu />
+        <Link href={"/store"}>Store</Link>
       </nav>
     </header>
   );

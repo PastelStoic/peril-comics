@@ -3,11 +3,10 @@ import ComicReader from "src/components/comicreader";
 import { trpc } from "src/utils/trpc";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Header from "src/components/header";
 
 const ComicPage = () => {
   const { comicname } = useRouter().query;
-  const { data: comic, isLoading, error } = trpc.comics.getByTitle.useQuery({title: comicname?.toString() ?? ""});
+  const { data: comic, isLoading, error } = trpc.comics.getByTitle.useQuery({title: comicname?.toString() ?? "notitle"});
   const updateComic = trpc.comics.updateComic.useMutation();
   const { data: session, status } = useSession();
 
@@ -27,7 +26,6 @@ const ComicPage = () => {
 
   return (
     <main className="flex flex-col items-center">
-      <Header/>
       <h1 className="text-3xl pt-4">{comic.title}</h1>
       <p className="pb-2">{comic.description}</p>
       {session ? (

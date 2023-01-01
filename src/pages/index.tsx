@@ -1,75 +1,22 @@
-import { type NextPage } from "next";
-import Head from "next/head";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
-import { trpc } from "src/utils/trpc";
 
-const Home: NextPage = () => {
-  const { data } = trpc.example.useQuery();
+const imgFirst = "flex flex-col items-center h-screen w-screen bg-no-repeat bg-cover bg-[url('https://media.discordapp.net/attachments/1013480960983060491/1017960730168934500/shop-top-new-2020-FLAT.jpg?width=1663&height=935')]";
+const imgSecond = "flex flex-col items-center h-screen w-screen bg-no-repeat bg-cover bg-[url('https://img1.wsimg.com/isteam/ip/5d0f9553-b972-4928-9e80-b14567783772/appetite.jpg/:/cr=t:0%25,l:0%25,w:100%25,h:100%25/rs=w:2046,h:2046')]";
+
+function Home() {
   return (
     <>
-      <Head>
-        <title>Peril Comics</title>
-        <meta name="description" content="The ultimate destination for peril comics." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-          <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {data}
-            </p>
-            <AuthShowcase />
-          </div>
-        </div>
-      </main>
+    <div className={imgFirst}>
+      <h1 className="text-center text-6xl drop-shadow-sm tracking-wide w-2/3 pt-20 pb-5">THE NEXT GENERATION OF PERIL COMICS</h1>
+      <h2 className="text-center text-4xl pt-4 w-1/2 pb-5">WHAT&apos;S YOUR PERIL?</h2>
+      <div className="bg-red-700 rounded-md px-2 py-1 text-2xl">
+        <Link href="/store">Check out the new stuff</Link>
+      </div>
+    </div>
+    <div className={imgSecond}>
+    </div>
     </>
   );
-};
+}
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}, your role is {sessionData.user?.role ?? 'unknown'}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => signOut() : () => signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-};

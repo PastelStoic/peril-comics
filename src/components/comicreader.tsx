@@ -45,7 +45,13 @@ function ComicReader({comicData} : ReaderProps) {
 
   return (
     <div>
-      {comicData.tags.map(t => (<button className="px-4 py-2 rounded-md border-2 border-zinc-800 bg-white text-black" key={t.ref_name} onClick={() => toggleTag(t.ref_name)}>{t.display_name}</button>))}
+      <div>
+      {comicData.tags.map(t => (<button 
+      className="px-4 py-2 rounded-md border-2 border-zinc-800 bg-white text-black" 
+      key={t.ref_name} 
+      onClick={() => toggleTag(t.ref_name)}>
+        {t.display_name}</button>))}
+      </div>
       <div className={styles.container}>
         <div className={styles.overlapGrid}>
           {imagesThisLayer().map(i => (
@@ -63,8 +69,6 @@ function ComicReader({comicData} : ReaderProps) {
                   alt="comic page"
                   width={2000}
                   height={3000}
-                  layout="responsive"
-                  objectFit="contain"
                 />}
               </motion.div>
             ))}

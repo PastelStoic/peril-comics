@@ -11,6 +11,7 @@ type ReaderProps = {
   className?: string,
 }
 
+// lock icon to show which ones the user owns?
 function ComicCard({comicData, className} : ReaderProps) {
   if (!comicData) return (<div></div>);
   return (
