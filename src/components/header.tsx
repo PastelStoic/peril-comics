@@ -25,7 +25,7 @@ function AccountMenu() {
 function Header() {
   return (
     <header>
-      <nav className="flex flex-row items-center bg-black text-white w-screen">
+      <nav className="flex flex-row items-center text-white w-screen">
         <div className="flex-none mr-4">
           <Link href="/" legacyBehavior>
             <Image 

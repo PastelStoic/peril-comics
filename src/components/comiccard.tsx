@@ -15,7 +15,7 @@ type ReaderProps = {
 function ComicCard({comicData, className} : ReaderProps) {
   if (!comicData) return (<div></div>);
   return (
-    <div className={`bg-black p-2 flex flex-col m-2 ` + className}>
+    <div className={`p-2 flex flex-col m-2 ` + className}>
       <div className="relative">
         {comicData.thumbnail && 
           <Image 

@@ -20,12 +20,10 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <meta name="description" content="The ultimate destination for peril comics." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="bg-black bg-cover text-white">
         <Header />
         <Component {...pageProps} />
         <Analytics />
         <Footer />
-      </main>
     </SessionProvider>
   );
 };
