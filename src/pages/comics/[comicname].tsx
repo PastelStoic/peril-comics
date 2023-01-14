@@ -33,7 +33,7 @@ const ComicPage = () => {
           <ComicReader comicData={comic} />
           {session.user?.role === "admin" ? 
           <div>
-            <Link href={`/admin/editor/${comicname}`} legacyBehavior><p className="border-2 border-white rounded-md m-2 cursor-pointer">Edit this comic</p></Link>
+            <Link href={`/admin/editor/${comicname}`}><p className="border-2 border-white rounded-md m-2 cursor-pointer">Edit this comic</p></Link>
             <button className="border-2 border-white rounded-md m-2 cursor-pointer" onClick={togglePrivate}>{comic.is_private ? "Make Public" : "Make Private"}</button>
           </div>
              : <></>}

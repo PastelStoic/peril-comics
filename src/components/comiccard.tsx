@@ -27,7 +27,7 @@ function ComicCard({comicData, className} : ReaderProps) {
           />}
       </div>
       <div className="justify-self-end text-center">
-        <Link key={comicData.title} href={"/comics/" + comicData.title} legacyBehavior>
+        <Link key={comicData.title} href={"/comics/" + comicData.title}>
           <p className="text-xl cursor-pointer underline text-blue-600">{comicData.title}</p>
         </Link>
         <p>{comicData.description}</p>
