@@ -7,7 +7,7 @@ export const tagRouter = router({
   .input(z.object({
     name: z.string().nullable(),
   }))
-  .query(async ({ctx, input}) => {
+  .mutation(async ({ctx, input}) => {
     try {
       return await searchTags(ctx.edgedb, input);
     } catch (error) {

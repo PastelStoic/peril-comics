@@ -12,3 +12,12 @@ export type CloudflareUploadResult = {
   },
   success: boolean,
 }
+
+export type CloudflareGetUploadUrlResult = {
+  result?: {
+    id: string,
+    uploadURL: string,
+  },
+  result_info: unknown,
+  success: boolean,
+}

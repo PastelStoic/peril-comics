@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AsyncTagSelect from 'src/components/searchBars/asyncTagSearch';
+import { TagSearchBar } from 'src/components/asyncsearchbar';
 import PageSelector from 'src/components/pageSelector';
 
 /*
@@ -62,14 +62,6 @@ const comicData =
   ],
 };
 
-// a way for people to pick an image from a list. Previews would be tricky - maybe just a name?
-function ImageSelector() {
-  return (
-    <>
-    </>
-  )
-}
-
 // should the remove button go in the big editor?
 function ImageEditor(props: {image: Image}) {
   const img = props.image;
@@ -102,7 +94,7 @@ function ImageEditor(props: {image: Image}) {
       </div>
     ))}
     <p>Add tag</p>
-    <AsyncTagSelect onChange={(newVal) => addTag(newVal?.value ?? "")} />
+    <TagSearchBar onChange={(newVal) => addTag(newVal?.value ?? "")} />
     <button onClick={removeImage}>Remove from comic</button>
     </>
   );
@@ -118,18 +110,18 @@ export default function ComicEditor() {
     console.log(`Setting comic ${comicData.id} to title ${title}`);
   }
   function updateDescription(description: string) {
-    console.log(`Setting comic ${comicData.id} to title ${description}`);
+    console.log(`Setting comic ${comicData.id} to description ${description}`);
   }
 
   return (
     <>
     <p>Title</p>
-    <input type="text" minLength={3} onChange={(event) => updateTitle(event.target.value)} />
+    <input type="text" className='text-black rounded-md p-1' minLength={3} onChange={(event) => updateTitle(event.target.value)} />
     <p>Description</p>
-    <input type="text" minLength={3} onChange={(event) => updateDescription(event.target.value)} />
+    <textarea className='text-black rounded-md p-1' minLength={3} onChange={(event) => updateDescription(event.target.value)} />
     <p>Thumbnail</p>
     <p>Preview of the page?</p>
-    {comicData.images.filter(i => i.page === page).map(i => <div key={i.name}><ImageEditor image={i} /></div>)}
+    {comicData.images.filter(i => i.page === page).map(i => <div className='w-64' key={i.name}><ImageEditor image={i} /></div>)}
     <PageSelector totalPages={1} currentPage={page} onPageSet={setPage} />
     <p>Toggle to make public or private</p>
     </>

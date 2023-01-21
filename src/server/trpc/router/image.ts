@@ -3,15 +3,8 @@ import { env } from "src/env/server.mjs";
 import { router, adminOnlyProcedure } from "../trpc";
 import axios from "axios";
 import * as queries from "dbschema/queries";
+import type { CloudflareGetUploadUrlResult } from "src/types/cloudflare";
 
-type CloudflareImageResult = {
-  result?: {
-    id: string,
-    uploadURL: string,
-  },
-  result_info: unknown,
-  success: boolean,
-}
 
 export const imageRouter = router({
   getUploadUrl: adminOnlyProcedure
@@ -22,7 +15,7 @@ export const imageRouter = router({
           "Authorization": `Bearer ${env.CLOUDFLARE_IMAGES_TOKEN}`
         }
       });
-      return uploadUrl.data as CloudflareImageResult;
+      return uploadUrl.data as CloudflareGetUploadUrlResult;
     } catch (error) {
       console.log("error", error);
     }
@@ -92,6 +85,18 @@ export const imageRouter = router({
     text: z.string().nullish(),
   }))
   .query(async ({ctx, input}) => {
+    try {
+      return await queries.searchUnassignedImages(ctx.edgedb, input);
+    } catch (error) {
+      console.log(error);
+    }
+  }),
+
+  searchImages: adminOnlyProcedure
+  .input(z.object({
+    text: z.string(),
+  }))
+  .mutation(async ({ctx, input}) => {
     try {
       return await queries.searchUnassignedImages(ctx.edgedb, input);
     } catch (error) {

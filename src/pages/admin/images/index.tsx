@@ -10,12 +10,19 @@ import { useForm, type SubmitHandler } from "react-hook-form"
 import { trpc } from "src/utils/trpc";
 import type { CloudflareUploadResult } from "src/types/cloudflare";
 
+const images = [
+  {
+    name: "image 1",
+
+  }
+];
+
 type ImageType = {
   name: string,
   files: FileList,
 }
 
-async function getCloudflareUploadUrl(uploadURL: string, formData: FormData): Promise<CloudflareUploadResult | null> {
+async function uploadCloudflareImage(uploadURL: string, formData: FormData): Promise<CloudflareUploadResult | null> {
   try {
     const uploadResult = await fetch(uploadURL, {
       method: "POST",
@@ -42,39 +49,39 @@ export default function UploadImage() {
     if (!imageFile) return;
     const formData = new FormData();
     formData.append("file", imageFile);
-
-    try {
-      const uploadResult = await fetch(uploadURL, {
-        method: "POST",
-        body: formData,
+    
+    const resultData = await uploadCloudflareImage(uploadURL, formData);
+    if (resultData?.result) {
+      const id = resultData.result.id;
+      const result = await uploadImageMutation.mutateAsync({
+        name: data.name ?? resultData.result.filename,
+        id,
       });
-      const resultData = await uploadResult.json() as CloudflareUploadResult;
-      if (resultData.result) {
-        const id = resultData.result.id;
-        const result = await uploadImageMutation.mutateAsync({
-          name: data.name ?? resultData.result.filename,
-          id,
-        });
-        if (result) {
-          changeResultText("Upload successful!");
-          reset();
-        } else changeResultText("Sorry, there was an error with your upload.");
-      }
-    } catch (error) {
-      console.error(error);
-      changeResultText("Sorry, there was an error with your upload.");
-    }
-    // redirect
+      if (result) {
+        changeResultText("Upload successful!");
+        reset();
+      } else changeResultText("Sorry, there was an error with your upload.");
+    } else changeResultText("Sorry, there was an error with your upload.");
   }
 
-  return (<>
-    <form className="m-2" onSubmit={handleSubmit(onSubmit)}>
-      <label htmlFor="files">Image</label>
-      <input className="m-1" type="file" accept="image/*" {...register("files", {required: true})} /> <br/>
-      <label htmlFor="name">Image name</label>
-      <input className="m-1 p-1 rounded-md text-black" {...register('name', {required: true})} /> <br/>
-      <button className="m-1 p-1 cursor-pointer outline rounded-md" type="submit">Upload </button>
-    </form>
-    <p>{resultText}</p>
+  return (
+  <>
+  <p>List of existing images with pagination, also searchable</p>
+  <p>Each image can have its name edited? maybe</p>
+  {images.map(i => (
+    <div key={i.name}>
+      <p>Image preview here</p>
+      <p>{i.name}</p>
+    </div>
+  ))}
+  <p>Upload new</p>
+  <form className="m-2" onSubmit={handleSubmit(onSubmit)}>
+    <label htmlFor="files">Image</label>
+    <input className="m-1" type="file" accept="image/*" {...register("files", {required: true})} /> <br/>
+    <label htmlFor="name">Image name</label>
+    <input className="m-1 p-1 rounded-md text-black" {...register('name', {required: true})} /> <br/>
+    <button className="m-1 p-1 cursor-pointer outline rounded-md" type="submit">Upload </button>
+  </form>
+  <p>{resultText}</p>
   </>)
 }
