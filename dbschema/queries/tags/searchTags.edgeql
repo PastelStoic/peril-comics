@@ -1,4 +1,6 @@
 select Tag {
   display_name,
   ref_name,
-} filter ((<optional str>$name ilike .display_name) if exists <optional str>$name else true)
+} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
+limit 5
+# order by frequency of use?
