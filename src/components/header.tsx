@@ -37,7 +37,6 @@ function Header() {
           </Link>
         </div>
         <AccountMenu />
-        <Link href={"/store"}>Store</Link>
       </nav>
     </header>
   );

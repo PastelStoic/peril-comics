@@ -3,132 +3,6 @@
 
 import type {Executor} from "edgedb";
 
-export async function createComic(client: Executor, args: {
-  "title": string;
-  "description": string;
-}): Promise<{
-  "id": string;
-}> {
-  return client.queryRequiredSingle(`insert Comic {
-  title := <str>$title,
-  description := <str>$description,
-}`, args);
-}
-
-export async function createCloudflareImage(client: Executor, args: {
-  "id": string;
-  "name": string;
-}): Promise<{
-  "id": string;
-}> {
-  return client.queryRequiredSingle(`insert CloudflareImage {
-  image_id := <str>$id,
-  image_name := <str>$name,
-} 
-unless conflict on .image_name 
-else (
-  update CloudflareImage set {
-    image_id := <str>$id,
-  }
-)`, args);
-}
-
-export async function deleteComicImage(client: Executor, args: {
-  "id": string;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`delete ComicImage filter .id = <uuid>$id`, args);
-}
-
-export async function updateComic(client: Executor, args: {
-  "id": string;
-  "title": string;
-  "description": string;
-  "private": boolean;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update Comic filter .id = <uuid>$id
-set {
-  title := <str>$title,
-  description := <str>$description,
-  is_private := <bool>$private,
-}`, args);
-}
-
-export async function searchUnassignedImages(client: Executor, args: {
-  "text"?: string | null;
-}): Promise<{
-  "id": string;
-  "image_name": string;
-  "image_id": string;
-}[]> {
-  return client.query(`with searchText := <optional str>$text
-select CloudflareImage {
-  id,
-  image_name,
-  image_id,
-} filter (not exists .<image[is ComicImage]) and 
-(not exists .<thumbnail[is Comic]) and
-((.image_name ilike '%' ++ searchText ++ '%') if exists searchText else true)`, args);
-}
-
-export async function setRoleToGuest(client: Executor, args: {
-  "id": string;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update User filter .id = <uuid>$id 
-set {
-  role := 'guest',
-}`, args);
-}
-
-export async function getUserAccount(client: Executor, args: {
-  "userId": string;
-  "provider": string;
-}): Promise<{
-  "access_token": string | null;
-} | null> {
-  return client.querySingle(`select Account {
-  access_token,
-} filter .user.id = <uuid>$userId and .provider ilike <str>$provider
-limit 1`, args);
-}
-
-export async function searchTags(client: Executor, args: {
-  "name"?: string | null;
-}): Promise<{
-  "display_name": string;
-  "ref_name": string;
-}[]> {
-  return client.query(`select Tag {
-  display_name,
-  ref_name,
-} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)`, args);
-}
-
-export async function updateComicImage(client: Executor, args: {
-  "tags": string[];
-  "id": string;
-  "name": string;
-  "startPage": number;
-  "endPage": number;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`with newTags := array_unpack(<array<str>>$tags)
-update ComicImage filter .id = <uuid>$id
-set {
-  name := <str>$name,
-  startPage := <int32>$startPage,
-  endPage := <int32>$endPage,
-  layer := 1,
-  tags := (select Tag filter .ref_name in newTags)
-}`, args);
-}
-
 export async function addImageToComic(client: Executor, args: {
   "imageId": string;
   "page": number;
@@ -147,65 +21,16 @@ insert ComicImage {
 }`, args);
 }
 
-export async function searchComics(client: Executor, args: {
-  "searchText": string;
-  "includeHidden": boolean;
+export async function changeImageLayer(client: Executor, args: {
+  "imageId": string;
+  "layer": number;
 }): Promise<{
   "id": string;
-  "title": string;
-  "description": string;
-  "thumbnail": {
-    "image_id": string;
-  } | null;
-  "pages": number;
-  "tags": {
-    "display_name": string;
-    "is_hidden": boolean;
-  }[];
-}[]> {
-  return client.query(`select Comic {
-  id,
-  title,
-  description,
-  thumbnail: {
-    image_id,
-  },
-  pages,
-  tags: {
-    display_name,
-    is_hidden,
-  },
-} filter .title ilike <str>$searchText and (<bool>$includeHidden or not .is_private)`, args);
-}
-
-export async function getAllComics(client: Executor, args: {
-  "includeHidden": boolean;
-}): Promise<{
-  "id": string;
-  "title": string;
-  "description": string;
-  "thumbnail": {
-    "image_id": string;
-  } | null;
-  "pages": number;
-  "tags": {
-    "display_name": string;
-    "is_hidden": boolean;
-  }[];
-}[]> {
-  return client.query(`select Comic {
-  id,
-  title,
-  description,
-  thumbnail: {
-    image_id,
-  },
-  pages,
-  tags: {
-    display_name,
-    is_hidden,
-  },
-} filter (<bool>$includeHidden or not .is_private)`, args);
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  layer := <int32>$layer,
+}`, args);
 }
 
 export async function getComicByTitle(client: Executor, args: {
@@ -265,4 +90,231 @@ export async function getComicByTitle(client: Executor, args: {
   } order by .layer,
 
 } filter .title ilike <str>$title limit 1;`, args);
+}
+
+export async function searchComics(client: Executor, args: {
+  "searchText": string;
+  "includeHidden": boolean;
+}): Promise<{
+  "id": string;
+  "title": string;
+  "description": string;
+  "thumbnail": {
+    "image_id": string;
+  } | null;
+  "pages": number;
+  "tags": {
+    "display_name": string;
+    "is_hidden": boolean;
+  }[];
+}[]> {
+  return client.query(`select Comic {
+  id,
+  title,
+  description,
+  thumbnail: {
+    image_id,
+  },
+  pages,
+  tags: {
+    display_name,
+    is_hidden,
+  },
+} filter .title ilike <str>$searchText and (<bool>$includeHidden or not .is_private)`, args);
+}
+
+export async function changeImagePages(client: Executor, args: {
+  "imageId": string;
+  "startPage": number;
+  "endPage": number;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  startPage := <int32>$startPage,
+  endPage := <int32>$endPage,
+}`, args);
+}
+
+export async function deleteComicImage(client: Executor, args: {
+  "id": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`delete ComicImage filter .id = <uuid>$id`, args);
+}
+
+export async function createCloudflareImage(client: Executor, args: {
+  "id": string;
+  "name": string;
+}): Promise<{
+  "id": string;
+}> {
+  return client.queryRequiredSingle(`insert CloudflareImage {
+  image_id := <str>$id,
+  image_name := <str>$name,
+} 
+unless conflict on .image_name 
+else (
+  update CloudflareImage set {
+    image_id := <str>$id,
+  }
+)`, args);
+}
+
+export async function searchUnassignedImages(client: Executor, args: {
+  "text"?: string | null;
+}): Promise<{
+  "id": string;
+  "image_name": string;
+  "image_id": string;
+}[]> {
+  return client.query(`with searchText := <optional str>$text
+select CloudflareImage {
+  id,
+  image_name,
+  image_id,
+} filter (not exists .<image[is ComicImage]) and 
+(not exists .<thumbnail[is Comic]) and
+((.image_name ilike '%' ++ searchText ++ '%') if exists searchText else true)`, args);
+}
+
+export async function removeTagFromImage(client: Executor, args: {
+  "imageId": string;
+  "tagName": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  tags -= (select Tag filter .ref_name = <str>$tagName)
+}`, args);
+}
+
+export async function updateComicImage(client: Executor, args: {
+  "tags": string[];
+  "id": string;
+  "name": string;
+  "startPage": number;
+  "endPage": number;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`with newTags := array_unpack(<array<str>>$tags)
+update ComicImage filter .id = <uuid>$id
+set {
+  name := <str>$name,
+  startPage := <int32>$startPage,
+  endPage := <int32>$endPage,
+  layer := 1,
+  tags := (select Tag filter .ref_name in newTags)
+}`, args);
+}
+
+export async function getUserAccount(client: Executor, args: {
+  "userId": string;
+  "provider": string;
+}): Promise<{
+  "access_token": string | null;
+} | null> {
+  return client.querySingle(`select Account {
+  access_token,
+} filter .user.id = <uuid>$userId and .provider ilike <str>$provider
+limit 1`, args);
+}
+
+export async function setRoleToGuest(client: Executor, args: {
+  "id": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update User filter .id = <uuid>$id 
+set {
+  role := 'guest',
+}`, args);
+}
+
+export async function searchTags(client: Executor, args: {
+  "name"?: string | null;
+}): Promise<{
+  "display_name": string;
+  "ref_name": string;
+}[]> {
+  return client.query(`select Tag {
+  display_name,
+  ref_name,
+} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
+limit 5
+# order by frequency of use?`, args);
+}
+
+export async function createComic(client: Executor, args: {
+  "title": string;
+  "description": string;
+}): Promise<{
+  "id": string;
+}> {
+  return client.queryRequiredSingle(`insert Comic {
+  title := <str>$title,
+  description := <str>$description,
+}`, args);
+}
+
+export async function updateComic(client: Executor, args: {
+  "id": string;
+  "title": string;
+  "description": string;
+  "private": boolean;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update Comic filter .id = <uuid>$id
+set {
+  title := <str>$title,
+  description := <str>$description,
+  is_private := <bool>$private,
+}`, args);
+}
+
+export async function getAllComics(client: Executor, args: {
+  "includeHidden": boolean;
+}): Promise<{
+  "id": string;
+  "title": string;
+  "description": string;
+  "thumbnail": {
+    "image_id": string;
+  } | null;
+  "pages": number;
+  "tags": {
+    "display_name": string;
+    "is_hidden": boolean;
+  }[];
+}[]> {
+  return client.query(`select Comic {
+  id,
+  title,
+  description,
+  thumbnail: {
+    image_id,
+  },
+  pages,
+  tags: {
+    display_name,
+    is_hidden,
+  },
+} filter (<bool>$includeHidden or not .is_private)`, args);
+}
+
+export async function addTagToImage(client: Executor, args: {
+  "imageId": string;
+  "tagName": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  tags += (select Tag filter .ref_name = <str>$tagName)
+}`, args);
 }

@@ -16,16 +16,15 @@ function ComicCard({comicData, className} : ReaderProps) {
   if (!comicData) return (<div></div>);
   return (
     <div className={`p-2 flex flex-col m-2 ` + className}>
-      <div className="relative">
-        {comicData.thumbnail && 
-          <Image 
-          src={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${comicData.thumbnail.image_id}/thumbnail`} 
-          alt="Thumbnail" 
-          height={200} 
-          width={200}
-          objectFit="contain"
-          />}
-      </div>
+      {comicData.thumbnail && 
+        <Image 
+        className="object-contain rounded-lg self-center"
+        src={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${comicData.thumbnail.image_id}/thumbnail`} 
+        alt="Thumbnail" 
+        height={200} 
+        width={200}
+        />
+      }
       <div className="justify-self-end text-center">
         <Link key={comicData.title} href={"/comics/" + comicData.title}>
           <p className="text-xl cursor-pointer underline text-blue-600">{comicData.title}</p>

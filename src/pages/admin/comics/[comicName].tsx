@@ -1,129 +1,141 @@
+import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { TagSearchBar } from 'src/components/asyncsearchbar';
+import { ImageSearchBar, TagSearchBar } from 'src/components/asyncsearchbar';
 import PageSelector from 'src/components/pageSelector';
+import { trpc } from 'src/utils/trpc';
+import type { RouterOutputs } from 'src/utils/trpc';
 
-/*
-A list of all the images in a comic. 
-Each has an editor to change their name and tags, each tag also having an "inverted" option.
-They also have "delete" buttons. 
-At the bottom is an "upload new image" option.
-
-Maybe make every image have its own form?
- */
-
-type Image = {
-  name: string,
-  layer: number,
-  tags: {
-    display_name: string,
-    ref_name: string,
-    inverted: boolean,
-  }[],
-}
-const comicData = 
-{
-  id: "id",
-  title: "comic",
-  description: "Tifa is ambushed by a strange predatory monster.",
-  is_private: false,
-  tags: [
-    {
-      display_name: "Opacity",
-      ref_name: "opacity",
-      is_hidden: true,
-      enabled: true,
-    },
-    {
-      display_name: "Underwear",
-      ref_name: "underwear",
-      is_hidden: true,
-      enabled: true,
-    },
-  ],
-  images: [
-    {
-      id: "",
-      name: "image 1",
-      layer: 0,
-      page: 1,
-      tags: [
-        {
-          display_name: "Opacity",
-          ref_name: "opacity",
-          inverted: false,
-        },
-        {
-          display_name: "Underwear",
-          ref_name: "underwear",
-          inverted: false,
-        },
-      ],
-    },
-  ],
-};
+type Image = NonNullable<RouterOutputs['comics']['getByTitle']>['images'][0];
 
 // should the remove button go in the big editor?
 function ImageEditor(props: {image: Image}) {
   const img = props.image;
+  const [ tags, setTags ] = useState(img.tags);
+  const changeLayerMutation = trpc.images.changeImageLayer.useMutation();
+  const changePagesMutation = trpc.images.changeImagePages.useMutation();
+  const removeTagMutation = trpc.images.removeTagFromImage.useMutation();
+  const addTagMutation = trpc.images.addTagToImage.useMutation();
 
   function toggleTagInversion(tagName: string, inverted: boolean) {
     console.log(`Tag ${tagName} for image ${img.name} has been set to inverted: ${inverted}`);
   }
+
   function removeTag(tagName: string) {
     if (tagName.length === 0) return;
+    setTags(tags.filter(t => t.ref_name !== tagName));
+    removeTagMutation.mutate({imageId: img.id, tagName});
     console.log(`Tag ${tagName} for image id ${img.name} has been removed.`);
   }
-  function addTag(tagName: string) {
-    if (tagName.length === 0) return;
-    console.log(`Tag ${tagName} for image id ${img.name} has been added.`);
+
+  function addTag(tag: { label: string, value: string } | null) {
+    if (!tag) return;
+    tags.push({display_name: tag.label, ref_name: tag.value, inverted: false});
+    setTags([...tags]);
+    addTagMutation.mutate({imageId: img.id, tagName: tag.value});
+    console.log(`Tag ${tag.label} for image id ${img.name} has been added.`);
   }
-  function removeImage() {
-    console.log(`Removing image ${img.name} from comic.`);
+
+  function changeLayer(layer: number) {
+    if (isNaN(layer) || layer < 0) return;
+    changeLayerMutation.mutate({imageId: img.id, layer});
+    console.log(`Setting image ${img.name} to layer ${layer}`);
+  }
+
+  function changeStartPage(page: number) {
+    if (isNaN(page) || page < 1 || page > img.endPage) return;
+    changePagesMutation.mutate({imageId: img.id, startPage: page, endPage: img.endPage});
+    console.log(`Setting image ${img.name} to start page ${page}`);
+  }
+
+  function changeEndPage(page: number) {
+    if (isNaN(page) || page < 1 || page < img.startPage) return;
+    changePagesMutation.mutate({imageId: img.id, startPage: img.startPage, endPage: page});
+    console.log(`Setting image ${img.name} to end page ${page}`);
   }
 
   return (
     <>
     <p>Image goes here</p>
     <p>{img.name}</p>
-    <p>{img.layer}</p>
-    {img.tags.map(t => (
+    <input id='layer' type="number" min={0} className='text-black rounded-md p-1' defaultValue={img.layer} onChange={(event) => changeLayer(Number(event.target.value))} />
+    <label htmlFor="layer">Layer</label>
+    <br />
+    <input id='startpage' type="number" min={1} className='text-black rounded-md p-1' defaultValue={img.startPage} onChange={(event) => changeStartPage(Number(event.target.value))} />
+    <label htmlFor="startpage">Start page</label>
+    <br />
+    <input id='endpage' type="number" min={1} className='text-black rounded-md p-1' defaultValue={img.endPage} onChange={(event) => changeEndPage(Number(event.target.value))} />
+    <label htmlFor="endpage">End page</label>
+    <br />
+    {tags.map(t => (
       <div key={t.ref_name} className="border-white border-2">
         <p>{t.display_name}</p>
         <input type="checkbox" onChange={(event) => toggleTagInversion(t.ref_name, event.target.checked)} defaultChecked={t.inverted}/><span>Inverted</span>
+        <br />
         <button onClick={() => removeTag(t.ref_name)}>Remove</button>
       </div>
     ))}
     <p>Add tag</p>
-    <TagSearchBar onChange={(newVal) => addTag(newVal?.value ?? "")} />
-    <button onClick={removeImage}>Remove from comic</button>
+    <TagSearchBar onChange={(newVal) => addTag(newVal)} />
     </>
   );
 }
 
 export default function ComicEditor() {
-  // function to edit title and description
-  // add and remove tags, and toggle default for each
-  // replace/add thumnbnail
-  // toggle for public
   const [ page, setPage ] = useState(1);
+  const router = useRouter();
+  const { data: comic, error } = trpc.comics.getByTitle.useQuery({title: router.query.comicname?.toString() ?? "notitle"});
+  const removeImageMutation = trpc.images.deleteImage.useMutation();
+  const addImageMutation = trpc.images.addImageToComic.useMutation();
+  const updateComicMutation = trpc.comics.updateComic.useMutation();
+  
   function updateTitle(title: string) {
-    console.log(`Setting comic ${comicData.id} to title ${title}`);
+    if (!comic) return;
+    updateComicMutation.mutate({id: comic.id, title, description: comic.description, private: comic.is_private});
+    console.log(`Setting comic ${comic?.id} to title ${title}`);
   }
+
   function updateDescription(description: string) {
-    console.log(`Setting comic ${comicData.id} to description ${description}`);
+    if (!comic) return;
+    updateComicMutation.mutate({id: comic.id, title: comic.title, description, private: comic.is_private});
+    console.log(`Setting comic ${comic?.id} to description ${description}`);
   }
+
+  function toggleComicPrivate(is_private: boolean) {
+    if (!comic) return;
+    updateComicMutation.mutate({id: comic.id, title: comic.title, description: comic.description, private: is_private});
+    console.log(`Setting comic ${comic?.title} privacy to ${is_private}`);
+  }
+
+  function removeImage(id: string) {
+    removeImageMutation.mutate({id});
+    router.reload();
+    console.log(`Removing image id ${id} from comic.`);
+  }
+
+  function addImage(imageId?: string) {
+    if (!comic || !imageId) return;
+    addImageMutation.mutate({comicId: comic.id, imageId, page});
+    router.reload();
+  }
+
+  if (error) return <>{error.message}</>;
+  if (!comic) return <>Loading...</>;
 
   return (
     <>
     <p>Title</p>
-    <input type="text" className='text-black rounded-md p-1' minLength={3} onChange={(event) => updateTitle(event.target.value)} />
+    <input type="text" className='text-black rounded-md p-1' defaultValue={comic.title} onChange={(event) => updateTitle(event.target.value)} />
     <p>Description</p>
-    <textarea className='text-black rounded-md p-1' minLength={3} onChange={(event) => updateDescription(event.target.value)} />
+    <textarea className='text-black rounded-md p-1' defaultValue={comic.description} onChange={(event) => updateDescription(event.target.value)} />
     <p>Thumbnail</p>
     <p>Preview of the page?</p>
-    {comicData.images.filter(i => i.page === page).map(i => <div className='w-64' key={i.name}><ImageEditor image={i} /></div>)}
+    {comic.images.filter(i => i.startPage <= page && i.endPage >= page).map(i => <div className='w-96 outline-dashed p-1 m-3' key={i.name}>
+      <ImageEditor image={i} />
+      <button onClick={() => removeImage(i.id)}>Remove from comic</button>
+      </div>)}
     <PageSelector totalPages={1} currentPage={page} onPageSet={setPage} />
-    <p>Toggle to make public or private</p>
+    <input type="checkbox" onChange={(event) => toggleComicPrivate(event.target.checked)} defaultChecked={comic.is_private}/><span>Inverted</span>
+    <ImageSearchBar onChange={(val) => addImage(val?.value)} />
     </>
   );
 }

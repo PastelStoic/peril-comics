@@ -103,4 +103,57 @@ export const imageRouter = router({
       console.log(error);
     }
   }),
+
+  removeTagFromImage: adminOnlyProcedure
+  .input(z.object({
+    imageId: z.string(),
+    tagName: z.string(),
+  }))
+  .mutation(async ({ctx, input}) => {
+    try {
+      await queries.removeTagFromImage(ctx.edgedb, input);
+    } catch (error) {
+      console.log(error);
+    }
+  }),
+
+  addTagToImage: adminOnlyProcedure
+  .input(z.object({
+    imageId: z.string(),
+    tagName: z.string(),
+  }))
+  .mutation(async ({ctx, input}) => {
+    try {
+      await queries.addTagToImage(ctx.edgedb, input);
+    } catch (error) {
+      console.log(error);
+    }
+  }),
+
+  changeImagePages: adminOnlyProcedure
+  .input(z.object({
+    imageId: z.string(),
+    startPage: z.number().min(1),
+    endPage: z.number().min(1),
+  }))
+  .mutation(async ({ctx, input}) => {
+    try {
+      await queries.changeImagePages(ctx.edgedb, input);
+    } catch (error) {
+      console.log(error);
+    }
+  }),
+
+  changeImageLayer: adminOnlyProcedure
+  .input(z.object({
+    imageId: z.string(),
+    layer: z.number().min(1),
+  }))
+  .mutation(async ({ctx, input}) => {
+    try {
+      await queries.changeImageLayer(ctx.edgedb, input);
+    } catch (error) {
+      console.log(error);
+    }
+  }),
 });
