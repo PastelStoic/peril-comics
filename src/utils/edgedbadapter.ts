@@ -159,7 +159,7 @@ export default function EdgeDBAdapter(client: Client, userProps: Array<string>):
         ) {
           expires,
           sessionToken,
-          userId
+          userId := .user.id
         };
       `, { expires, sessionToken, userId });
         },
