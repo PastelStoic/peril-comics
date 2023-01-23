@@ -1,7 +1,7 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 // Prisma adapter for NextAuth, optional and can be removed
-import { EdgeDBAdapter } from "@bruno_crosier/edgedb-adapter";
+import EdgeDBAdapter from "src/utils/edgedbadapter";
 
 import { env } from "src/env/server.mjs";
 import { edgedb } from "src/server/db/client";

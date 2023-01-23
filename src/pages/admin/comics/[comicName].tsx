@@ -129,10 +129,13 @@ export default function ComicEditor() {
     <textarea className='text-black rounded-md p-1' defaultValue={comic.description} onChange={(event) => updateDescription(event.target.value)} />
     <p>Thumbnail</p>
     <p>Preview of the page?</p>
-    {comic.images.filter(i => i.startPage <= page && i.endPage >= page).map(i => <div className='w-96 outline-dashed p-1 m-3' key={i.name}>
-      <ImageEditor image={i} />
-      <button onClick={() => removeImage(i.id)}>Remove from comic</button>
-      </div>)}
+    <div className='grid-cols-1 md:grid-cols-4'>
+      {comic.images.filter(i => i.startPage <= page && i.endPage >= page).map(i => <div className='w-96 outline-dashed p-1 m-3' key={i.name}>
+        <ImageEditor image={i} />
+        <button onClick={() => removeImage(i.id)}>Remove from comic</button>
+        </div>)
+      }
+    </div>
     <PageSelector totalPages={1} currentPage={page} onPageSet={setPage} />
     <input type="checkbox" onChange={(event) => toggleComicPrivate(event.target.checked)} defaultChecked={comic.is_private}/><span>Inverted</span>
     <ImageSearchBar onChange={(val) => addImage(val?.value)} />
