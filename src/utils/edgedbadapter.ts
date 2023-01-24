@@ -1,5 +1,5 @@
 import type { Client } from "edgedb";
-import { Adapter, AdapterSession, AdapterUser } from "next-auth/adapters";
+import type { Adapter, AdapterSession, AdapterUser } from "next-auth/adapters";
 
 export default function EdgeDBAdapter(client: Client, userProps: Array<string>): Adapter {
     return {
