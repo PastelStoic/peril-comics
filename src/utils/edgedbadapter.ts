@@ -198,7 +198,7 @@ export default function EdgeDBAdapter(client: Client, userProps: Array<string>):
           sessionToken := <optional str>$sessionToken,
           expires := <optional str>$expires, 
           user := (
-            select User filter .id = <uuid>$userId
+            select User filter .id = <optional uuid>$userId
           )
 
         select (          
