@@ -49,7 +49,7 @@ function ComicReader({comicData} : ReaderProps) {
     <p className="italic">Hold ctrl while scrolling to zoom.</p>
     <div className="sticky top-0 z-10">
       {comicData.tags.map(t => (<button 
-      className="px-4 py-2 rounded-md border-2 border-zinc-800 bg-white text-black" 
+      className={`px-4 py-2 rounded-md border-2 border-zinc-800 text-black ${(comictags.get(t.ref_name) ?? false) ? "bg-white" : "bg-slate-600"}`} 
       key={t.ref_name} 
       onClick={() => toggleTag(t.ref_name)}>
         {t.display_name}</button>))
