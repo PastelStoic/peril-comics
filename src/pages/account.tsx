@@ -46,7 +46,7 @@ export default function Account() {
   };
   const patreonAuthUrl = `https://patreon.com/oauth2/authorize?response_type=code&client_id=${patreon.client_id}&redirect_uri=${patreon.redirect_uri}`;
   
-  if (!session) return <div>Sorry, you need to be logged in.</div>
+  if (!session) return (<div>Sorry, you need to be logged in.</div>);
 
   return (
     <div className="p-10">
