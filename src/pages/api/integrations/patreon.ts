@@ -38,12 +38,18 @@ async function patreonValidate(req: NextApiRequest, res: NextApiResponse) {
         return;
       }
 
+      const { token_type, expires_in, access_token, refresh_token, scope } = tokenData;
+
       const edgedb = createClient();
       await createUserAccount(edgedb, {
         id,
         provider: "patreon",
+        token_type,
+        expires_in,
+        access_token,
+        refresh_token,
         providerAccountId,
-        ...tokenData,
+        scope,
       });
     }
   } catch (error) {
