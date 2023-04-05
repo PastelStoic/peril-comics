@@ -1,14 +1,8 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import styles from "src/styles/Home.module.css";
 import type { RouterOutputs } from "src/utils/trpc";
 import { env } from 'src/env/client.mjs';
-
-const layerVarients = {
-  enabled: {opacity: 1},
-  disabled: {opacity: 0}
-}
 
 type Comic = RouterOutputs["comics"]["getByTitle"];
 type ReaderProps = {
@@ -58,22 +52,15 @@ function ComicReader({comicData} : ReaderProps) {
     <div className={styles.container}>
       <div className={styles.overlapGrid}>
         {imagesThisLayer().map(i => (
-            <motion.div
-              key={i.layer}
-              variants={layerVarients}
-              initial={isImageEnabled(i) ? "enabled" : "disabled"}
-              animate={isImageEnabled(i) ? "enabled" : "disabled"}
-              transition={{ duration: 1 }}
-            >
-              {i.image && <Image
+            <>{i.image && <Image
                 src={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${i.image.image_id}/public`}
                 blurDataURL={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${i.image.image_id}/thumbnail`}
                 placeholder="blur"
                 alt="comic page"
                 width={1000}
                 height={2000}
-              />}
-            </motion.div>
+                className={isImageEnabled(i) ? "opacity-100" : "opacity-0"}
+              />}</>
           ))}
       </div>
     </div>
