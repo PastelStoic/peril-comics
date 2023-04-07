@@ -52,7 +52,7 @@ function ComicReader({comicData} : ReaderProps) {
     <div className={styles.container}>
       <div className={styles.overlapGrid}>
         {imagesThisLayer().map(i => (
-            <>{i.image && <Image
+            <div key={i.id} className={isImageEnabled(i) ? "opacity-100" : "opacity-0"}>{i.image && <Image
                 src={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${i.image.image_id}/public`}
                 blurDataURL={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${i.image.image_id}/thumbnail`}
                 placeholder="blur"
@@ -60,7 +60,7 @@ function ComicReader({comicData} : ReaderProps) {
                 width={1000}
                 height={2000}
                 className={isImageEnabled(i) ? "opacity-100" : "opacity-0"}
-              />}</>
+              />}</div>
           ))}
       </div>
     </div>
