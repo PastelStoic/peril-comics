@@ -35,14 +35,14 @@ export default function Account() {
 
   const subStar = {
     client_id: env.NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID,
-    redirect_uri: "https://peril-comics-test.vercel.app/api/integrations/subscribestar",
+    redirect_uri: "https://peril-comics.vercel.app/api/integrations/subscribestar",
     scopes: "subscriber.read+user.read",
   };
   const substarAuthUrl = `https://subscribestar.adult/oauth2/authorize?client_id=${subStar.client_id}&redirect_uri=${subStar.redirect_uri}&response_type=code&scope=${subStar.scopes}`;
 
   const patreon = {
     client_id: env.NEXT_PUBLIC_PATREON_CLIENT_ID,
-    redirect_uri: "https://peril-comics-test.vercel.app/api/integrations/patreon",
+    redirect_uri: "https://peril-comics.vercel.app/api/integrations/patreon",
   };
   const patreonAuthUrl = `https://patreon.com/oauth2/authorize?response_type=code&client_id=${patreon.client_id}&redirect_uri=${patreon.redirect_uri}`;
   

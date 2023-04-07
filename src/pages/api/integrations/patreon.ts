@@ -6,7 +6,7 @@ import { getServerAuthSession } from "src/server/common/get-server-auth-session"
 import type { tokenResult } from "src/types/oauth-token";
 import { createUserAccount } from "dbschema/queries";
 
-const redirect_uri = "https://peril-comics-test.vercel.app/api/integrations/patreon";
+const redirect_uri = "https://peril-comics.vercel.app/api/integrations/patreon";
 
 async function patreonValidate(req: NextApiRequest, res: NextApiResponse) {
   const code = req.query["code"];
