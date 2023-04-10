@@ -20,7 +20,7 @@ const ComicPage = () => {
     });
   }
 
-  if (isLoading || !session) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error.message}</div>;
   if (!comic) return <div>Sorry, that comic could not be found.</div>;
   if (!session) return <div><p>Please log in to view content.</p></div>;
