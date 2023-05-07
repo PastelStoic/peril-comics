@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { getComicByTitle, getAllComics, updateComic, createComic, searchComics } from 'dbschema/queries';
 import { router, publicProcedure, supporterOnlyProcedure, adminOnlyProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 export const comicRouter = router({
   search: publicProcedure
@@ -12,7 +13,8 @@ export const comicRouter = router({
     try {
       const includeHidden = ctx.session?.user?.role === "admin";
       if (!input.title || input.title.length === 0) return await getAllComics(ctx.edgedb, { includeHidden });
-      return await searchComics(ctx.edgedb, { searchText: input.title, includeHidden, page: input.page });
+      const result = await searchComics(ctx.edgedb, { searchText: input.title, includeHidden, page: input.page });
+      return result;
     } catch (error) {
       console.log("error", error);
     }
@@ -23,11 +25,9 @@ export const comicRouter = router({
     title: z.string().min(1),
   }))
   .query(async ({ctx, input}) => {
-    try {
-      return await getComicByTitle(ctx.edgedb, input);
-    } catch (error) {
-      console.log("error", error);
-    }
+    const result = await getComicByTitle(ctx.edgedb, input);
+    if (result) return result;
+    throw new TRPCError({message: "No comic could be found by that name.", code: "NOT_FOUND"});
   }),
 
   createComic: adminOnlyProcedure
