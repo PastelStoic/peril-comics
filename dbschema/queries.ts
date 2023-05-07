@@ -15,18 +15,6 @@ export async function createComic(client: Executor, args: {
 }`, args);
 }
 
-export async function addTagToImage(client: Executor, args: {
-  "imageId": string;
-  "tagName": string;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
-set {
-  tags += (select Tag filter .ref_name = <str>$tagName)
-}`, args);
-}
-
 export async function updateComic(client: Executor, args: {
   "id": string;
   "title": string;
@@ -40,6 +28,18 @@ set {
   title := <str>$title,
   description := <str>$description,
   is_private := <bool>$private,
+}`, args);
+}
+
+export async function addTagToImage(client: Executor, args: {
+  "imageId": string;
+  "tagName": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  tags += (select Tag filter .ref_name = <str>$tagName)
 }`, args);
 }
 
@@ -144,6 +144,50 @@ set {
 }`, args);
 }
 
+export async function searchTags(client: Executor, args: {
+  "name"?: string | null;
+}): Promise<{
+  "display_name": string;
+  "ref_name": string;
+}[]> {
+  return client.query(`select Tag {
+  display_name,
+  ref_name,
+} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
+limit 5
+# order by frequency of use?`, args);
+}
+
+export async function createUserAccount(client: Executor, args: {
+  "id": string;
+  "provider": string;
+  "token_type": string;
+  "expires_in": number;
+  "access_token": string;
+  "refresh_token": string;
+  "providerAccountId": string;
+  "scope": string;
+}): Promise<{
+  "id": string;
+}> {
+  return client.queryRequiredSingle(`INSERT Account {
+  user := (SELECT User FILTER .id = <uuid>$id),
+  type := "oauth",
+  provider := <str>$provider,
+  token_type := <str>$token_type,
+  expires_at := <int64>$expires_in,
+  access_token := <str>$access_token,
+  refresh_token := <str>$refresh_token,
+  providerAccountId := <str>$providerAccountId,
+  scope := <str>$scope,
+} UNLESS CONFLICT ON .providerAccountId
+ELSE (UPDATE Account SET {
+  expires_at := <int64>$expires_in,
+  access_token := <str>$access_token,
+  refresh_token := <str>$refresh_token,
+})`, args);
+}
+
 export async function getAllComics(client: Executor, args: {
   "includeHidden": boolean;
 }): Promise<{
@@ -174,9 +218,22 @@ export async function getAllComics(client: Executor, args: {
 } filter (<bool>$includeHidden or not .is_private)`, args);
 }
 
+export async function getUserAccount(client: Executor, args: {
+  "userId": string;
+  "provider": string;
+}): Promise<{
+  "access_token": string | null;
+} | null> {
+  return client.querySingle(`select Account {
+  access_token,
+} filter .user.id = <uuid>$userId and .provider ilike <str>$provider
+limit 1`, args);
+}
+
 export async function searchComics(client: Executor, args: {
   "searchText": string;
   "includeHidden": boolean;
+  "page"?: number | null;
 }): Promise<{
   "id": string;
   "title": string;
@@ -202,7 +259,9 @@ export async function searchComics(client: Executor, args: {
     display_name,
     is_hidden,
   },
-} filter .title ilike <str>$searchText and (<bool>$includeHidden or not .is_private)`, args);
+} filter .title ilike <str>$searchText and (<bool>$includeHidden or not .is_private)
+offset (5 * <optional int32>$page ?? 0)
+limit 5`, args);
 }
 
 export async function getComicByTitle(client: Executor, args: {
@@ -264,6 +323,17 @@ export async function getComicByTitle(client: Executor, args: {
 } filter .title ilike <str>$title limit 1;`, args);
 }
 
+export async function setRoleToGuest(client: Executor, args: {
+  "id": string;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update User filter .id = <uuid>$id 
+set {
+  role := 'guest',
+}`, args);
+}
+
 export async function addImageToComic(client: Executor, args: {
   "imageId": string;
   "page": number;
@@ -280,71 +350,4 @@ insert ComicImage {
   layer := 1,
   comic := (select Comic filter .id = <uuid>$comicId),
 }`, args);
-}
-
-export async function getUserAccount(client: Executor, args: {
-  "userId": string;
-  "provider": string;
-}): Promise<{
-  "access_token": string | null;
-} | null> {
-  return client.querySingle(`select Account {
-  access_token,
-} filter .user.id = <uuid>$userId and .provider ilike <str>$provider
-limit 1`, args);
-}
-
-export async function setRoleToGuest(client: Executor, args: {
-  "id": string;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update User filter .id = <uuid>$id 
-set {
-  role := 'guest',
-}`, args);
-}
-
-export async function searchTags(client: Executor, args: {
-  "name"?: string | null;
-}): Promise<{
-  "display_name": string;
-  "ref_name": string;
-}[]> {
-  return client.query(`select Tag {
-  display_name,
-  ref_name,
-} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
-limit 5
-# order by frequency of use?`, args);
-}
-
-export async function createUserAccount(client: Executor, args: {
-  "id": string;
-  "provider": string;
-  "token_type": string;
-  "expires_in": number;
-  "access_token": string;
-  "refresh_token": string;
-  "providerAccountId": string;
-  "scope": string;
-}): Promise<{
-  "id": string;
-}> {
-  return client.queryRequiredSingle(`INSERT Account {
-  user := (SELECT User FILTER .id = <uuid>$id),
-  type := "oauth",
-  provider := <str>$provider,
-  token_type := <str>$token_type,
-  expires_at := <int64>$expires_in,
-  access_token := <str>$access_token,
-  refresh_token := <str>$refresh_token,
-  providerAccountId := <str>$providerAccountId,
-  scope := <str>$scope,
-} UNLESS CONFLICT ON .providerAccountId
-ELSE (UPDATE Account SET {
-  expires_at := <int64>$expires_in,
-  access_token := <str>$access_token,
-  refresh_token := <str>$refresh_token,
-})`, args);
 }

@@ -14,6 +14,7 @@ function AccountMenu() {
     <button className="mx-1 px-1 py-2" onClick={() => signOut()}>
     Log out
     </button>
+    {session.user?.role === "admin" && <Link href={"/admin"}>Admin home page</Link>}
   </>);
   return (
     <button className="mx-2 px-1 py-2" onClick={() => signIn("discord")}>

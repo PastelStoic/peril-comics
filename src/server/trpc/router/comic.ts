@@ -6,12 +6,13 @@ export const comicRouter = router({
   search: publicProcedure
   .input(z.object({
     title: z.string().nullish(),
+    page: z.number().min(1).nullish(),
   }))
   .query(async ({ctx, input}) => {
     try {
       const includeHidden = ctx.session?.user?.role === "admin";
       if (!input.title || input.title.length === 0) return await getAllComics(ctx.edgedb, { includeHidden });
-      return await searchComics(ctx.edgedb, { searchText: input.title, includeHidden });
+      return await searchComics(ctx.edgedb, { searchText: input.title, includeHidden, page: input.page });
     } catch (error) {
       console.log("error", error);
     }

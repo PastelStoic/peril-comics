@@ -1,26 +1,25 @@
-// a master list of all comics, the number of pages and images in each, the tags for each comic, and a button to edit
-// possibly viewership stats?
-
+import Link from "next/link";
+import { useState } from "react";
 import PageSelector from "src/components/pageSelector";
+import { trpc } from "src/utils/trpc";
 
 export default function ComicsMain() {
-  const allComics = [
-    {
-      id: "id",
-      title: "comic",
-    },
-  ];
+  const [ currentPage, setCurrentPage ] = useState(1);
+  const { data, error } = trpc.comics.search.useQuery({page: currentPage});
+
+  if (error) return(<>{error.message}</>);
+  if (!data) return(<>Loading...</>);
 
   return (
     <>
-    {allComics.map(c => (
-      <div key={c.title}>
+    {data.map(c => (
+      <div className="m-2" key={c.title}>
         <p>Comic thumnnail</p>
-        <p>Title</p>
-        <p>Tags</p>
+        <p><Link href={`/admin/comics/${c.title}`}>{c.title}</Link></p>
+        <p>{c.tags.map(t => t.display_name).join(", ")}</p>
       </div>
     ))}
-    <PageSelector totalPages={6} currentPage={1} onPageSet={page => console.log(`Setting page to ${page}`)}/>
+    <PageSelector totalPages={Math.ceil(data.length / 5)} currentPage={currentPage} onPageSet={setCurrentPage}/>
     </>
   );
 }
