@@ -27,7 +27,7 @@ export const comicRouter = router({
   .query(async ({ctx, input}) => {
     const result = await getComicByTitle(ctx.edgedb, input);
     if (result) return result;
-    throw new TRPCError({message: "No comic could be found by that name.", code: "NOT_FOUND"});
+    throw new TRPCError({message: `No comic "${input.title}" could be found.`, code: "NOT_FOUND"});
   }),
 
   createComic: adminOnlyProcedure
@@ -57,4 +57,5 @@ export const comicRouter = router({
       console.log(error);
     }
   }),
+  
 });
