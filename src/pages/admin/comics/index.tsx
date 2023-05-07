@@ -15,7 +15,7 @@ export default function ComicsMain() {
     {data.map(c => (
       <div className="m-2" key={c.title}>
         <p>Comic thumnnail</p>
-        <p><Link href={`/admin/comics/${c.title}`}>{c.title}</Link></p>
+        <p><Link href={`/admin/comics/edit/${c.title}`}>{c.title}</Link></p>
         <p>{c.tags.map(t => t.display_name).join(", ")}</p>
       </div>
     ))}
