@@ -83,7 +83,11 @@ function ImageEditor(props: {image: Image}) {
 export default function ComicEditor() {
   const [ page, setPage ] = useState(1);
   const router = useRouter();
-  const { data: comic, error } = trpc.comics.getByTitle.useQuery({title: router.query.comicname?.toString() ?? "notitle"});
+  const comicName = router.query.comicname;
+
+  if (!comicName) return (<>Sorry, we weren&apos;t able to access the comic title.</>);
+
+  const { data: comic, error } = trpc.comics.getByTitle.useQuery({title: comicName.toString()});
   const removeImageMutation = trpc.images.deleteImage.useMutation();
   const addImageMutation = trpc.images.addImageToComic.useMutation();
   const updateComicMutation = trpc.comics.updateComic.useMutation();
