@@ -21,22 +21,6 @@ export const imageRouter = router({
     }
   }),
 
-  uploadImage: adminOnlyProcedure
-  .input(z.object({
-    id: z.string().min(10),
-    name: z.string(),
-    comicId: z.string(),
-  }))
-  .mutation(async ({ctx, input}) => {
-    try {
-      const result = await queries.createCloudflareImage(ctx.edgedb, input);
-      return result?.id;
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
-  }),
-
   deleteImage: adminOnlyProcedure
   .input(z.object({
     id: z.string().min(10),
@@ -52,13 +36,14 @@ export const imageRouter = router({
 
   addImageToComic: adminOnlyProcedure
   .input(z.object({
+    cloudflare_id: z.string(),
+    image_name: z.string(),
     comicId: z.string().min(10),
-    imageId: z.string(),
     page: z.number(),
   }))
   .mutation(async ({ctx, input}) => {
     try {
-      await queries.addImageToComic(ctx.edgedb, input);
+      return await queries.addImageToComic(ctx.edgedb, input);
     } catch (error) {
       console.log("error", error);
     }

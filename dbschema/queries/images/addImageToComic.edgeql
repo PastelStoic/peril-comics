@@ -4,7 +4,7 @@ with usedImage := (select (
     image_name := <str>$image_name,
   } unless conflict on .image_name else (
     update CloudflareImage set {
-      image_id := <str>$id,
+      image_id := <str>$cloudflare_id,
     })
   ))
 insert ComicImage {

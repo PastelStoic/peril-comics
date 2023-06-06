@@ -26,9 +26,9 @@ async function uploadCloudflareImage(uploadURL: string, formData: FormData): Pro
   }
 }
 
-function ImageUploadForm(props: {comicId: string}) {
+function ImageUploadForm(props: {comicId: string, currentPage: number}) {
   const getUploadUrl = trpc.images.getUploadUrl.useMutation();
-  const uploadImageMutation = trpc.images.uploadImage.useMutation();
+  const uploadImageMutation = trpc.images.addImageToComic.useMutation();
   const { register, handleSubmit, reset } = useForm<ImageType>();
 
   const onSubmit: SubmitHandler<ImageType> = async data => {
@@ -45,11 +45,12 @@ function ImageUploadForm(props: {comicId: string}) {
     
     const resultData = await uploadCloudflareImage(uploadURL, formData);
     if (resultData?.result) {
-      const id = resultData.result.id;
+      const cloudflare_id = resultData.result.id;
       const result = await uploadImageMutation.mutateAsync({
-        name: resultData.result.filename,
-        id,
+        image_name: resultData.result.filename,
+        cloudflare_id,
         comicId: props.comicId,
+        page: props.currentPage,
       });
       if (result) {
         alert("Upload successful!");
@@ -183,12 +184,6 @@ export default function ComicEditor() {
     console.log(`Removing image id ${id} from comic.`);
   }
 
-  function addImage(imageId?: string) {
-    if (!comic || !imageId) return;
-    addImageMutation.mutate({comicId: comic.id, imageId, page});
-    router.reload();
-  }
-
   if (error) return <>{error.message}</>;
   if (!comic) return <>Loading...</>;
 
@@ -208,7 +203,7 @@ export default function ComicEditor() {
     </div>
     <PageSelector totalPages={comic.pages} currentPage={page} onPageSet={setPage} />
     <input type="checkbox" onChange={(event) => toggleComicPrivate(event.target.checked)} defaultChecked={comic.is_private}/><span>Inverted</span>
-    <ImageUploadForm comicId={comic.id}/>
+    <ImageUploadForm comicId={comic.id} currentPage={page}/>
     </>
   );
 }
