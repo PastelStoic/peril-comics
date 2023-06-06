@@ -25,6 +25,7 @@ export const imageRouter = router({
   .input(z.object({
     id: z.string().min(10),
     name: z.string(),
+    comicId: z.string(),
   }))
   .mutation(async ({ctx, input}) => {
     try {
@@ -75,18 +76,6 @@ export const imageRouter = router({
   .mutation(async ({ctx, input}) => {
     try {
       await queries.updateComicImage(ctx.edgedb, input);
-    } catch (error) {
-      console.log(error);
-    }
-  }),
-  
-  getUnassignedImages: adminOnlyProcedure
-  .input(z.object({
-    text: z.string().nullish(),
-  }))
-  .query(async ({ctx, input}) => {
-    try {
-      return await queries.searchUnassignedImages(ctx.edgedb, input);
     } catch (error) {
       console.log(error);
     }
