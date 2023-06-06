@@ -4,6 +4,8 @@ import { ImageSearchBar, TagSearchBar } from 'src/components/asyncsearchbar';
 import PageSelector from 'src/components/pageSelector';
 import { trpc } from 'src/utils/trpc';
 import type { RouterOutputs } from 'src/utils/trpc';
+import Image from 'next/image';
+import { env } from 'src/env/client.mjs';
 
 type Image = NonNullable<RouterOutputs['comics']['getByTitle']>['images'][0];
 
@@ -55,17 +57,20 @@ function ImageEditor(props: {image: Image}) {
 
   return (
     <>
-    <p>Image goes here</p>
+    <Image 
+      src={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${img.image.image_id}/public`}
+      blurDataURL={`https://imagedelivery.net/${env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH}/${img.image.image_id}/thumbnail`} 
+      alt="Image"/>
     <p>{img.name}</p>
     <input id='layer' type="number" min={0} className='text-black rounded-md p-1' defaultValue={img.layer} onChange={(event) => changeLayer(Number(event.target.value))} />
     <label htmlFor="layer">Layer</label>
-    <br />
+    <br/>
     <input id='startpage' type="number" min={1} className='text-black rounded-md p-1' defaultValue={img.startPage} onChange={(event) => changeStartPage(Number(event.target.value))} />
     <label htmlFor="startpage">Start page</label>
-    <br />
+    <br/>
     <input id='endpage' type="number" min={1} className='text-black rounded-md p-1' defaultValue={img.endPage} onChange={(event) => changeEndPage(Number(event.target.value))} />
     <label htmlFor="endpage">End page</label>
-    <br />
+    <br/>
     {tags.map(t => (
       <div key={t.ref_name} className="border-white border-2">
         <p>{t.display_name}</p>
@@ -131,7 +136,6 @@ export default function ComicEditor() {
     <input type="text" className='text-black rounded-md p-1' defaultValue={comic.title} onChange={(event) => updateTitle(event.target.value)} />
     <p>Description</p>
     <textarea className='text-black rounded-md p-1' defaultValue={comic.description} onChange={(event) => updateDescription(event.target.value)} />
-    <p>Thumbnail</p>
     <p>Preview of the page?</p>
     <div className='grid-cols-1 md:grid-cols-4'>
       {comic.images.filter(i => i.startPage <= page && i.endPage >= page).map(i => <div className='w-96 outline-dashed p-1 m-3' key={i.name}>
@@ -140,7 +144,7 @@ export default function ComicEditor() {
         </div>)
       }
     </div>
-    <PageSelector totalPages={1} currentPage={page} onPageSet={setPage} />
+    <PageSelector totalPages={comic.pages} currentPage={page} onPageSet={setPage} />
     <input type="checkbox" onChange={(event) => toggleComicPrivate(event.target.checked)} defaultChecked={comic.is_private}/><span>Inverted</span>
     <ImageSearchBar onChange={(val) => addImage(val?.value)} />
     </>
