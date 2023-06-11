@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import { env } from "src/env/server.mjs";
 import superjson from "superjson";
 import { checkPatreonStatus, checkSubscribestarStatus } from "../externals/userpayments";
 
@@ -26,7 +27,7 @@ export const publicProcedure = t.procedure;
  * users are logged in
  */
 const isAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session || !ctx.session.user) {
+  if (!ctx.session || !ctx.session.user || env.NODE_ENV !== "development") {
     throw new TRPCError({ 
       code: "UNAUTHORIZED",
       message: "You must be logged in to do that.",

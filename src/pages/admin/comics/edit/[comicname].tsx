@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { ImageSearchBar, TagSearchBar } from 'src/components/asyncsearchbar';
+import { TagSearchBar } from 'src/components/asyncsearchbar';
 import PageSelector from 'src/components/pageSelector';
 import { trpc } from 'src/utils/trpc';
 import type { RouterOutputs } from 'src/utils/trpc';
@@ -38,32 +38,41 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
       alert("Failed to obtain upload code.");
       return;
     }
-    const imageFile = data.files.item(0);
-    if (!imageFile) return;
-    const formData = new FormData();
-    formData.append("file", imageFile);
+
+    const uploadRes = {
+      success: true,
+      errors: new Array<string>(),
+    };
+
+    for (let i = 0; i < data.files.length; i++) {
+      const imageFile = data.files.item(i);
+      if (!imageFile) continue;
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const resultData = await uploadCloudflareImage(uploadURL, formData);
+      if (resultData?.result) {
+        const cloudflare_id = resultData.result.id;
+        const result = await uploadImageMutation.mutateAsync({
+          image_name: resultData.result.filename,
+          cloudflare_id,
+          comicId: props.comicId,
+          page: props.currentPage,
+        });
+        if (!result) uploadRes.errors.push(`Failed to add image ${resultData.result.filename} to database.`);
+      } else uploadRes.errors.push(`Failed to upload image ${imageFile.name} to image host.`);
+    }
     
-    const resultData = await uploadCloudflareImage(uploadURL, formData);
-    if (resultData?.result) {
-      const cloudflare_id = resultData.result.id;
-      const result = await uploadImageMutation.mutateAsync({
-        image_name: resultData.result.filename,
-        cloudflare_id,
-        comicId: props.comicId,
-        page: props.currentPage,
-      });
-      if (result) {
-        alert("Upload successful!");
-        reset();
-      } else alert("Sorry, there was an error with your upload.");
-    } else alert("Sorry, there was an error with your upload.");
+    if (uploadRes.success) {
+      alert("Upload successful!");
+      reset();
+    } else alert(uploadRes.errors.join('\n'));
   }  
   
   return (
     <>
     <form className="m-2" onSubmit={handleSubmit(onSubmit)}>
       <label htmlFor="files">Image</label>
-      <input className="m-1" type="file" accept="image/*" {...register("files", {required: true})} /> <br/>
+      <input className="m-1" type="file" accept="image/*" multiple={true} {...register("files", {required: true})} /> <br/>
       <button className="m-1 p-1 cursor-pointer outline rounded-md" type="submit">Upload</button>
     </form>
     </>

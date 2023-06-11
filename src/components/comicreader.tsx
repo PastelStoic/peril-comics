@@ -49,10 +49,11 @@ function ComicReader({comicData} : ReaderProps) {
         {t.display_name}</button>))
       }
       {comicData.states.length > 0 && 
+      <div>
       <label htmlFor="stateselector">Versions</label>
-      <select id="stateselector">
-        {comicData.states.map(s => <option key={s.name}>{s.name}</option>)}
-      </select>
+      <select id="stateselector" onSubmit={s => console.log(s.currentTarget.value)}>
+        {comicData.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+      </select></div>
       }
     </div>
     <div className={styles.container}>
