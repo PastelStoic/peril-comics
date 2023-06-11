@@ -32,16 +32,17 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
   const { register, handleSubmit, reset } = useForm<ImageType>();
 
   const onSubmit: SubmitHandler<ImageType> = async data => {
-    const uploadURLResult = await getUploadUrl.mutateAsync();
-    const uploadURL = uploadURLResult?.result?.uploadURL;
-    if (!uploadURL) {
-      alert("Failed to obtain upload code.");
-      return;
-    }
 
     const uploadErrors = new Array<string>();
 
     for (let i = 0; i < data.files.length; i++) {
+      const uploadURLResult = await getUploadUrl.mutateAsync();
+      const uploadURL = uploadURLResult?.result?.uploadURL;
+      if (!uploadURL) {
+        uploadErrors.push("Failed to obtain upload code.");
+        return;
+      }
+
       const imageFile = data.files.item(i);
       if (!imageFile) continue;
       const formData = new FormData();
