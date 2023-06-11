@@ -44,6 +44,9 @@ module default {
     required property is_hidden -> bool {
       default := false;
     }
+    required property creates_button -> bool {
+      default := true;
+    }
   }
 
   type CloudflareImage {

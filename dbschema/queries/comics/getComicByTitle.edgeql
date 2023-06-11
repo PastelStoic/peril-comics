@@ -8,6 +8,7 @@ select Comic {
     display_name,
     ref_name,
     enabled := @enabled ?? true,
+    creates_button,
   },
   images: {
     id,
