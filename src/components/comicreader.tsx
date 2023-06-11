@@ -38,6 +38,14 @@ function ComicReader({comicData} : ReaderProps) {
     setTags(new Map(comictags));
   }
 
+  function setComicState(stateName: string) {
+    const newState = comicData.states.find(s => s.name == stateName);
+    if (!newState) return;
+    console.log("state named" + stateName)
+    newState.tag_states.forEach(t => comictags.set(t[0], t[1]));
+    setTags(new Map(comictags));
+  }
+
   return (
     <>
     <p className="italic">Hold ctrl while scrolling to zoom.</p>
@@ -49,11 +57,11 @@ function ComicReader({comicData} : ReaderProps) {
         {t.display_name}</button>))
       }
       {comicData.states.length > 0 && 
-      <div>
-      <label htmlFor="stateselector">Versions</label>
-      <select id="stateselector" onSubmit={s => console.log(s.currentTarget.value)}>
+      <>
+      <label htmlFor="stateselector" className="m-1">Version</label>
+      <select id="stateselector" className="m-1 p-1 rounded-md bg-white text-black" onChange={s => setComicState(s.currentTarget.value)}>
         {comicData.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-      </select></div>
+      </select></>
       }
     </div>
     <div className={styles.container}>
