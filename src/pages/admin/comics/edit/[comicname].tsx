@@ -39,10 +39,7 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
       return;
     }
 
-    const uploadRes = {
-      success: true,
-      errors: new Array<string>(),
-    };
+    const uploadErrors = new Array<string>();
 
     for (let i = 0; i < data.files.length; i++) {
       const imageFile = data.files.item(i);
@@ -58,14 +55,14 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
           comicId: props.comicId,
           page: props.currentPage,
         });
-        if (!result) uploadRes.errors.push(`Failed to add image ${resultData.result.filename} to database.`);
-      } else uploadRes.errors.push(`Failed to upload image ${imageFile.name} to image host.`);
+        if (!result) uploadErrors.push(`Failed to add image ${resultData.result.filename} to database.`);
+      } else uploadErrors.push(`Failed to upload image ${imageFile.name} to image host.`);
     }
     
-    if (uploadRes.success) {
+    if (uploadErrors.length == 0) {
       alert("Upload successful!");
       reset();
-    } else alert(uploadRes.errors.join('\n'));
+    } else alert(uploadErrors.join('\n'));
   }  
   
   return (
