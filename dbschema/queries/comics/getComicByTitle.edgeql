@@ -24,5 +24,8 @@ select Comic {
       inverted := @inverted ?? false,
     },
   } order by .layer,
-
+  states: {
+    name,
+    tag_states,
+  },
 } filter .title ilike <str>$title limit 1;

@@ -1,22 +1,28 @@
 module default {
-type Comic {
-  multi link images := (.<comic[is ComicImage]);
-  multi link tags -> Tag {
-      property enabled -> bool {
-          default := false;
-      };
+  type Comic {
+    multi link images := (.<comic[is ComicImage]);
+    multi link tags -> Tag {
+        property enabled -> bool {
+            default := false;
+        };
+    };
+    optional link thumbnail -> CloudflareImage;
+    required property description -> str;
+    required property is_private -> bool {
+        default := true;
+    };
+    required property pages := ((max(.images.endPage) ?? 0));
+    required property published_date -> datetime {
+        default := (datetime_of_transaction());
+    };
+    required property title -> str;
+    multi link states -> ComicState;
   };
-  optional link thumbnail -> CloudflareImage;
-  required property description -> str;
-  required property is_private -> bool {
-      default := true;
-  };
-  required property pages := ((max(.images.endPage) ?? 0));
-  required property published_date -> datetime {
-      default := (datetime_of_transaction());
-  };
-  required property title -> str;
-};
+
+  type ComicState {
+    required property name -> str;
+    multi property tag_states -> tuple<str, bool>;
+  }
 
   type ComicImage {
     required property name -> str;

@@ -157,7 +157,6 @@ export default function ComicEditor() {
 
   const { data: comic, error } = trpc.comics.getByTitle.useQuery({title: comicName.toString()});
   const removeImageMutation = trpc.images.deleteImage.useMutation();
-  const addImageMutation = trpc.images.addImageToComic.useMutation();
   const updateComicMutation = trpc.comics.updateComic.useMutation();
   
   function updateTitle(title: string) {

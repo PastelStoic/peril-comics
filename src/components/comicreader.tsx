@@ -48,6 +48,12 @@ function ComicReader({comicData} : ReaderProps) {
       onClick={() => toggleTag(t.ref_name)}>
         {t.display_name}</button>))
       }
+      {comicData.states.length > 0 && 
+      <label htmlFor="stateselector">Versions</label>
+      <select id="stateselector">
+        {comicData.states.map(s => <option key={s.name}>{s.name}</option>)}
+      </select>
+      }
     </div>
     <div className={styles.container}>
       <div className={styles.overlapGrid}>
