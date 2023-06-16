@@ -13,6 +13,7 @@ type Image = NonNullable<Comic>["images"][0];
 
 function ComicReader({comicData} : ReaderProps) {
   const [page, setPage] = useState(1);
+  const [comicState, setComicState] = useState("");
   const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, t.enabled])));
   if (!comicData) return <div>An error occured loading data.</div>;
 
@@ -22,7 +23,9 @@ function ComicReader({comicData} : ReaderProps) {
       const setting = comictags.get(t.ref_name) ?? false;
       if (t.inverted) return !setting;
       return setting;
-    });
+    }) && 
+    // also check that the comic state is one of the image states
+    (true);
   }
 
   function imagesThisLayer() {
@@ -38,12 +41,14 @@ function ComicReader({comicData} : ReaderProps) {
     setTags(new Map(comictags));
   }
 
-  function setComicState(stateName: string) {
+  function switchComicState(stateName: string) {
     const newState = comicData.states.find(s => s.name == stateName);
     if (!newState) return;
+    // state needs to be stored in a usestate, so the images can use them
     console.log("state named" + stateName)
     newState.tag_states.forEach(t => comictags.set(t[0], t[1]));
     setTags(new Map(comictags));
+    setComicState(stateName);
   }
 
   return (
@@ -59,7 +64,7 @@ function ComicReader({comicData} : ReaderProps) {
       {comicData.states.length > 0 && 
       <>
       <label htmlFor="stateselector" className="m-1">Version</label>
-      <select id="stateselector" className="m-1 p-1 rounded-md bg-white text-black" onChange={s => setComicState(s.currentTarget.value)}>
+      <select id="stateselector" className="m-1 p-1 rounded-md bg-white text-black" onChange={s => switchComicState(s.currentTarget.value)}>
         {comicData.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
       </select></>
       }
