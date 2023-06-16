@@ -35,6 +35,7 @@ module default {
         default := false;
       }
     }
+    multi property display_versions -> str;
     link comic -> Comic;
   }
 
