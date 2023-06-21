@@ -44,7 +44,6 @@ function ComicReader({comicData} : ReaderProps) {
   function switchComicState(stateName: string) {
     const newState = comicData.states.find(s => s.name == stateName);
     if (!newState) return;
-    console.log("state named" + stateName)
     newState.tag_states.forEach(t => comictags.set(t[0], t[1]));
     setTags(new Map(comictags));
     setComicState(stateName);
