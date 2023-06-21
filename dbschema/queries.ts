@@ -15,6 +15,33 @@ export async function createComic(client: Executor, args: {
 }`, args);
 }
 
+export async function addImageToComic(client: Executor, args: {
+  "cloudflare_id": string;
+  "image_name": string;
+  "page": number;
+  "comicId": string;
+}): Promise<{
+  "id": string;
+}> {
+  return client.queryRequiredSingle(`with usedImage := (select (
+  insert CloudflareImage {
+    image_id := <str>$cloudflare_id,
+    image_name := <str>$image_name,
+  } unless conflict on .image_name else (
+    update CloudflareImage set {
+      image_id := <str>$cloudflare_id,
+    })
+  ))
+insert ComicImage {
+  name := <str>$image_name,
+  image := usedImage,
+  startPage := <int32>$page,
+  endPage := <int32>$page,
+  layer := 1,
+  comic := (select Comic filter .id = <uuid>$comicId),
+}`, args);
+}
+
 export async function addTagToImage(client: Executor, args: {
   "imageId": string;
   "tagName": string;
@@ -24,6 +51,32 @@ export async function addTagToImage(client: Executor, args: {
   return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
 set {
   tags += (select Tag filter .ref_name = <str>$tagName)
+}`, args);
+}
+
+export async function changeImageLayer(client: Executor, args: {
+  "imageId": string;
+  "layer": number;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  layer := <int32>$layer,
+}`, args);
+}
+
+export async function changeImagePages(client: Executor, args: {
+  "imageId": string;
+  "startPage": number;
+  "endPage": number;
+}): Promise<{
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  startPage := <int32>$startPage,
+  endPage := <int32>$endPage,
 }`, args);
 }
 
@@ -40,18 +93,6 @@ set {
   title := <str>$title,
   description := <str>$description,
   is_private := <bool>$private,
-}`, args);
-}
-
-export async function changeImageLayer(client: Executor, args: {
-  "imageId": string;
-  "layer": number;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
-set {
-  layer := <int32>$layer,
 }`, args);
 }
 
@@ -83,101 +124,6 @@ export async function getAllComics(client: Executor, args: {
     is_hidden,
   },
 } filter (<bool>$includeHidden or not .is_private)`, args);
-}
-
-export async function getComicByTitle(client: Executor, args: {
-  "title": string;
-}): Promise<{
-  "id": string;
-  "title": string;
-  "description": string;
-  "pages": number;
-  "is_private": boolean;
-  "tags": {
-    "display_name": string;
-    "ref_name": string;
-    "enabled": boolean;
-    "creates_button": boolean;
-  }[];
-  "images": {
-    "id": string;
-    "image": {
-      "image_id": string;
-    };
-    "name": string;
-    "layer": number;
-    "startPage": number;
-    "endPage": number;
-    "tags": {
-      "display_name": string;
-      "ref_name": string;
-      "inverted": boolean;
-    }[];
-  }[];
-  "states": {
-    "name": string;
-    "tag_states": [string, boolean][];
-  }[];
-} | null> {
-  return client.querySingle(`select Comic {
-  id,
-  title,
-  description,
-  pages,
-  is_private,
-  tags: {
-    display_name,
-    ref_name,
-    enabled := @enabled ?? true,
-    creates_button,
-  },
-  images: {
-    id,
-    image: {
-      image_id,
-    },
-    name,
-    layer,
-    startPage,
-    endPage,
-    tags: {
-      display_name,
-      ref_name,
-      inverted := @inverted ?? false,
-    },
-  } order by .layer,
-  states: {
-    name,
-    tag_states,
-  },
-} filter .title ilike <str>$title limit 1;`, args);
-}
-
-export async function addImageToComic(client: Executor, args: {
-  "cloudflare_id": string;
-  "image_name": string;
-  "page": number;
-  "comicId": string;
-}): Promise<{
-  "id": string;
-}> {
-  return client.queryRequiredSingle(`with usedImage := (select (
-  insert CloudflareImage {
-    image_id := <str>$cloudflare_id,
-    image_name := <str>$image_name,
-  } unless conflict on .image_name else (
-    update CloudflareImage set {
-      image_id := <str>$cloudflare_id,
-    })
-  ))
-insert ComicImage {
-  name := <str>$image_name,
-  image := usedImage,
-  startPage := <int32>$page,
-  endPage := <int32>$page,
-  layer := 1,
-  comic := (select Comic filter .id = <uuid>$comicId),
-}`, args);
 }
 
 export async function searchComics(client: Executor, args: {
@@ -214,38 +160,12 @@ offset (5 * <optional int32>$page ?? 0)
 limit 5`, args);
 }
 
-export async function changeImagePages(client: Executor, args: {
-  "imageId": string;
-  "startPage": number;
-  "endPage": number;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
-set {
-  startPage := <int32>$startPage,
-  endPage := <int32>$endPage,
-}`, args);
-}
-
 export async function deleteComicImage(client: Executor, args: {
   "id": string;
 }): Promise<{
   "id": string;
 } | null> {
   return client.querySingle(`delete ComicImage filter .id = <uuid>$id`, args);
-}
-
-export async function removeTagFromImage(client: Executor, args: {
-  "imageId": string;
-  "tagName": string;
-}): Promise<{
-  "id": string;
-} | null> {
-  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
-set {
-  tags -= (select Tag filter .ref_name = <str>$tagName)
-}`, args);
 }
 
 export async function searchUnassignedImages(client: Executor, args: {
@@ -265,18 +185,16 @@ select CloudflareImage {
 ((.image_name ilike '%' ++ searchText ++ '%') if exists searchText else true)`, args);
 }
 
-export async function searchTags(client: Executor, args: {
-  "name"?: string | null;
+export async function removeTagFromImage(client: Executor, args: {
+  "imageId": string;
+  "tagName": string;
 }): Promise<{
-  "display_name": string;
-  "ref_name": string;
-}[]> {
-  return client.query(`select Tag {
-  display_name,
-  ref_name,
-} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
-limit 5
-# order by frequency of use?`, args);
+  "id": string;
+} | null> {
+  return client.querySingle(`update ComicImage filter .id = <uuid>$imageId
+set {
+  tags -= (select Tag filter .ref_name = <str>$tagName)
+}`, args);
 }
 
 export async function updateComicImage(client: Executor, args: {
@@ -297,6 +215,20 @@ set {
   layer := 1,
   tags := (select Tag filter .ref_name in newTags)
 }`, args);
+}
+
+export async function searchTags(client: Executor, args: {
+  "name"?: string | null;
+}): Promise<{
+  "display_name": string;
+  "ref_name": string;
+}[]> {
+  return client.query(`select Tag {
+  display_name,
+  ref_name,
+} filter (((.display_name ilike '%' ++ <optional str>$name ++ '%')) if exists <optional str>$name else true)
+limit 5
+# order by frequency of use?`, args);
 }
 
 export async function createUserAccount(client: Executor, args: {
@@ -350,4 +282,74 @@ export async function setRoleToGuest(client: Executor, args: {
 set {
   role := 'guest',
 }`, args);
+}
+
+export async function getComicByTitle(client: Executor, args: {
+  "title": string;
+}): Promise<{
+  "id": string;
+  "title": string;
+  "description": string;
+  "pages": number;
+  "is_private": boolean;
+  "tags": {
+    "display_name": string;
+    "ref_name": string;
+    "enabled": boolean;
+    "creates_button": boolean;
+  }[];
+  "images": {
+    "id": string;
+    "image": {
+      "image_id": string;
+    };
+    "name": string;
+    "layer": number;
+    "startPage": number;
+    "endPage": number;
+    "tags": {
+      "display_name": string;
+      "ref_name": string;
+      "inverted": boolean;
+    }[];
+    "display_versions": string[];
+  }[];
+  "states": {
+    "name": string;
+    "tag_states": [string, boolean][];
+  }[];
+} | null> {
+  return client.querySingle(`select Comic {
+  id,
+  title,
+  description,
+  pages,
+  is_private,
+  tags: {
+    display_name,
+    ref_name,
+    enabled := @enabled ?? true,
+    creates_button,
+  },
+  images: {
+    id,
+    image: {
+      image_id,
+    },
+    name,
+    layer,
+    startPage,
+    endPage,
+    tags: {
+      display_name,
+      ref_name,
+      inverted := @inverted ?? false,
+    },
+    display_versions,
+  } order by .layer,
+  states: {
+    name,
+    tag_states,
+  },
+} filter .title ilike <str>$title limit 1;`, args);
 }

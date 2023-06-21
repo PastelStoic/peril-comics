@@ -24,6 +24,7 @@ select Comic {
       ref_name,
       inverted := @inverted ?? false,
     },
+    display_versions,
   } order by .layer,
   states: {
     name,

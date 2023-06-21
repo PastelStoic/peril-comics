@@ -25,7 +25,7 @@ function ComicReader({comicData} : ReaderProps) {
       return setting;
     }) && 
     // also check that the comic state is one of the image states
-    (true);
+    (image.display_versions.length == 0 || image.display_versions.includes(comicState));
   }
 
   function imagesThisLayer() {
@@ -44,7 +44,6 @@ function ComicReader({comicData} : ReaderProps) {
   function switchComicState(stateName: string) {
     const newState = comicData.states.find(s => s.name == stateName);
     if (!newState) return;
-    // state needs to be stored in a usestate, so the images can use them
     console.log("state named" + stateName)
     newState.tag_states.forEach(t => comictags.set(t[0], t[1]));
     setTags(new Map(comictags));
