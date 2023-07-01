@@ -4,6 +4,7 @@ select Comic {
   description,
   pages,
   is_private,
+  is_free,
   tags: {
     display_name,
     ref_name,

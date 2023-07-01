@@ -17,6 +17,9 @@ module default {
     };
     required property title -> str;
     multi link states -> ComicState;
+    required property is_free -> bool {
+      default := false;
+    }
   };
 
   type ComicState {
