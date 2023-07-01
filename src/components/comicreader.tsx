@@ -13,8 +13,8 @@ type Image = NonNullable<Comic>["images"][0];
 
 function ComicReader({comicData} : ReaderProps) {
   const [page, setPage] = useState(1);
-  const [comicState, setComicState] = useState("");
-  const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, t.enabled])));
+  const [comicState, setComicState] = useState(comicData.states[0]?.name ?? "");
+  const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, (comicData.states[0]?.tag_states.find(s => s[0] == t.ref_name)?.[1] ?? t.enabled)])));
   if (!comicData) return <div>An error occured loading data.</div>;
 
   function isImageEnabled(image: Image) {
