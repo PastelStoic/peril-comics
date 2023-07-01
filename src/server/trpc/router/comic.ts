@@ -30,7 +30,7 @@ export const comicRouter = router({
   .query(async ({ctx, input}) => {
     const result = await getComicByTitle(ctx.edgedb, input);
     // if comic is not public and there is no authed user, tell them to sign in
-    if (result?.is_free || !ctx.session?.user) {
+    if (!result?.is_free || !ctx.session?.user) {
       throw new TRPCError({ 
         code: "UNAUTHORIZED",
         message: `You must be a supporter at $15.00 or above to view this content, or be logged in with a guest access code.`
