@@ -6,13 +6,13 @@ import { env } from 'src/env/client.mjs';
 
 type Comic = RouterOutputs["comics"]["getByTitle"];
 type ReaderProps = {
-  comicData: Comic
+  comicData: Comic,
+  currentPage: number,
 }
 
 type Image = NonNullable<Comic>["images"][0];
 
-function ComicReader({comicData} : ReaderProps) {
-  const [page, setPage] = useState(1);
+function ComicReader({comicData, currentPage} : ReaderProps) {
   const [comicState, setComicState] = useState(comicData.states[0]?.name ?? "");
   const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, (comicData.states[0]?.tag_states.find(s => s[0] == t.ref_name)?.[1] ?? t.enabled)])));
   if (!comicData) return <div>An error occured loading data.</div>;
@@ -31,7 +31,7 @@ function ComicReader({comicData} : ReaderProps) {
   function imagesThisLayer() {
     if (!comicData?.images) return [];
     return comicData.images
-      .filter(i => page >= i.startPage && page <= i.endPage)
+      .filter(i => currentPage >= i.startPage && currentPage <= i.endPage)
       .sort((a, b) => a.layer - b.layer);
   }
 
@@ -82,8 +82,6 @@ function ComicReader({comicData} : ReaderProps) {
           ))}
       </div>
     </div>
-    {page > 1 && <button onClick={() => setPage(page - 1)} className="px-4 py-2 rounded-md border-2 border-zinc-800 bg-white text-black">Back</button>}
-    {page < comicData.pages && <button onClick={() => setPage(page + 1)} className="px-4 py-2 rounded-md border-2 border-zinc-800 bg-white text-black">Next</button>}
     </>
   );
 }
