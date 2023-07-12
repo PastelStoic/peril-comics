@@ -32,19 +32,17 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
   const { register, handleSubmit, reset } = useForm<ImageType>();
 
   const onSubmit: SubmitHandler<ImageType> = async data => {
-    const uploadURLResult = await getUploadUrl.mutateAsync();
-    const uploadURL = uploadURLResult?.result?.uploadURL;
-    if (!uploadURL) {
-      alert("Failed to obtain upload code.");
-      return;
-    }
 
-    const uploadRes = {
-      success: true,
-      errors: new Array<string>(),
-    };
+    const uploadErrors = new Array<string>();
 
     for (let i = 0; i < data.files.length; i++) {
+      const uploadURLResult = await getUploadUrl.mutateAsync();
+      const uploadURL = uploadURLResult?.result?.uploadURL;
+      if (!uploadURL) {
+        uploadErrors.push("Failed to obtain upload code.");
+        return;
+      }
+
       const imageFile = data.files.item(i);
       if (!imageFile) continue;
       const formData = new FormData();
@@ -58,14 +56,14 @@ function ImageUploadForm(props: {comicId: string, currentPage: number}) {
           comicId: props.comicId,
           page: props.currentPage,
         });
-        if (!result) uploadRes.errors.push(`Failed to add image ${resultData.result.filename} to database.`);
-      } else uploadRes.errors.push(`Failed to upload image ${imageFile.name} to image host.`);
+        if (!result) uploadErrors.push(`Failed to add image ${resultData.result.filename} to database.`);
+      } else uploadErrors.push(`Failed to upload image ${imageFile.name} to image host.`);
     }
     
-    if (uploadRes.success) {
+    if (uploadErrors.length == 0) {
       alert("Upload successful!");
       reset();
-    } else alert(uploadRes.errors.join('\n'));
+    } else alert(uploadErrors.join('\n'));
   }  
   
   return (

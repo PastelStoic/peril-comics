@@ -17,6 +17,9 @@ module default {
     };
     required property title -> str;
     multi link states -> ComicState;
+    required property is_free -> bool {
+      default := false;
+    }
   };
 
   type ComicState {
@@ -35,6 +38,7 @@ module default {
         default := false;
       }
     }
+    multi property display_versions -> str;
     link comic -> Comic;
   }
 
@@ -43,6 +47,9 @@ module default {
     required property ref_name -> str;
     required property is_hidden -> bool {
       default := false;
+    }
+    required property creates_button -> bool {
+      default := true;
     }
   }
 

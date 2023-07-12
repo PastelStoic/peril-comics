@@ -12,8 +12,10 @@ type ReaderProps = {
 
 type Image = NonNullable<Comic>["images"][0];
 
-function ComicReader({comicData, currentPage} : ReaderProps) {
-  const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, t.enabled])));
+function ComicReader({comicData} : ReaderProps) {
+  const [page, setPage] = useState(1);
+  const [comicState, setComicState] = useState(comicData.states[0]?.name ?? "");
+  const [comictags, setTags] = useState(new Map<string, boolean>(comicData?.tags.map(t => [t.ref_name, (comicData.states[0]?.tag_states.find(s => s[0] == t.ref_name)?.[1] ?? t.enabled)])));
   if (!comicData) return <div>An error occured loading data.</div>;
 
   function isImageEnabled(image: Image) {
@@ -22,7 +24,9 @@ function ComicReader({comicData, currentPage} : ReaderProps) {
       const setting = comictags.get(t.ref_name) ?? false;
       if (t.inverted) return !setting;
       return setting;
-    });
+    }) && 
+    // also check that the comic state is one of the image states
+    (image.display_versions.length == 0 || image.display_versions.includes(comicState));
   }
 
   function imagesThisLayer() {
@@ -38,22 +42,30 @@ function ComicReader({comicData, currentPage} : ReaderProps) {
     setTags(new Map(comictags));
   }
 
+  function switchComicState(stateName: string) {
+    const newState = comicData.states.find(s => s.name == stateName);
+    if (!newState) return;
+    newState.tag_states.forEach(t => comictags.set(t[0], t[1]));
+    setTags(new Map(comictags));
+    setComicState(stateName);
+  }
+
   return (
     <>
     <p className="italic">Hold ctrl while scrolling to zoom.</p>
     <div className="sticky top-0 z-10">
-      {comicData.tags.map(t => (<button 
+      {comicData.tags.filter(t => t.creates_button).map(t => (<button 
       className={`px-4 py-2 rounded-md border-2 border-zinc-800 text-black ${(comictags.get(t.ref_name) ?? false) ? "bg-white" : "bg-slate-600"}`} 
       key={t.ref_name} 
       onClick={() => toggleTag(t.ref_name)}>
         {t.display_name}</button>))
       }
       {comicData.states.length > 0 && 
-      <div>
-      <label htmlFor="stateselector">Versions</label>
-      <select id="stateselector" onSubmit={s => console.log(s.currentTarget.value)}>
+      <>
+      <label htmlFor="stateselector" className="m-1">Version</label>
+      <select id="stateselector" className="m-1 p-1 rounded-md bg-white text-black" onChange={s => switchComicState(s.currentTarget.value)}>
         {comicData.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-      </select></div>
+      </select></>
       }
     </div>
     <div className={styles.container}>
