@@ -5,7 +5,7 @@ import { checkPatreonStatus, checkSubscribestarStatus } from "../externals/userp
 import { type Context } from "./context";
 
 // configure this externally
-const supporterPaymentMin = 1500;
+const supporterPaymentMin = 300;
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
