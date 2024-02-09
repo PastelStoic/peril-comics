@@ -34,7 +34,11 @@ export const comicRouter = router({
       if (!ctx.session?.user) {
         throw new TRPCError({ 
           code: "UNAUTHORIZED",
-          message: `You must be a supporter at $15.00 or above to view this content, or be logged in with a guest access code.`
+          message: `To view this content, follow these steps:
+          1. Log in using your discord account (see above)
+          2. In the account page, link either your patreon or subscribestar account.
+          3. If you haven't already, support us on either site.
+          4. Enjoy the comics!`
         });
       } else {
         // if they're not an admin or guest, check if they're a supporter
@@ -46,7 +50,7 @@ export const comicRouter = router({
           if (!supporterData.some(data => data.supportAmount >= supporterPaymentMin)) {
             throw new TRPCError({ 
               code: "UNAUTHORIZED",
-              message: `You must be a supporter at $15.00 or above to view this content. Your current support level is $${Math.round(Math.max(...supporterData.map(d => d.supportAmount)) / 100)}.00. Your role is ${ctx.session.user.role}`
+              message: `You must be a supporter at $3.00 or above to view this content. Your current support level is $${Math.round(Math.max(...supporterData.map(d => d.supportAmount)) / 100)}.00. Your role is ${ctx.session.user.role}`
             });
           }
         }
