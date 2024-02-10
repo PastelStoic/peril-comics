@@ -24,6 +24,8 @@ export const serverSchema = z.object({
   SUBSCRIBESTAR_CLIENT_SECRET: z.string(),
   PATREON_CLIENT_ID: z.string(),
   PATREON_CLIENT_SECRET: z.string(),
+  GUMROAD_CLIENT_ID: z.string(),
+  GUMROAD_CLIENT_SECRET: z.string(),
   CLOUDFLARE_ACCOUNT_ID: z.string(),
   CLOUDFLARE_IMAGES_TOKEN: z.string(),
 });
@@ -36,6 +38,7 @@ export const serverSchema = z.object({
 export const clientSchema = z.object({
   NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID: z.string(),
   NEXT_PUBLIC_PATREON_CLIENT_ID: z.string(),
+  NEXT_PUBLIC_GUMROAD_CLIENT_ID: z.string(),
   NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH: z.string(),
 });
 
@@ -48,5 +51,6 @@ export const clientSchema = z.object({
 export const clientEnv = {
   NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID: process.env.NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID,
   NEXT_PUBLIC_PATREON_CLIENT_ID: process.env.NEXT_PUBLIC_PATREON_CLIENT_ID,
+  NEXT_PUBLIC_GUMROAD_CLIENT_ID: process.env.NEXT_PUBLIC_GUMROAD_CLIENT_ID,
   NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH: process.env.NEXT_PUBLIC_CLOUDFLARE_IMAGEHASH,
 };
