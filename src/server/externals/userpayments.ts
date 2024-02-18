@@ -111,12 +111,10 @@ export async function checkGumroadStatus(userId: string, client: Client) {
 
       isLinked = gumroadAccount !== null;
 
-      if (gumroadAccount?.access_token) {
-        const subscriberInto = await axios.get(`https://api.gumroad.com/v2/user?access_token=${gumroadAccount.access_token}`);
-        
+      if (gumroadAccount?.providerAccountId) {
         const productSubscribers = await axios.get(`https://api.gumroad.com/v2/products/${productId}/subscribers?access_token=${env.GUMROAD_ACCESS_TOKEN}`);
-        // check if subscriber in subscriberas
-        if ((productSubscribers.data.subscribers as {user_email: string}[]).find(s => s.user_email === subscriberInto.data.user.email)) {
+        // check if user in subscribers
+        if ((productSubscribers.data.subscribers as {user_id: string}[]).find(s => s.user_id === gumroadAccount.providerAccountId)) {
           isLinked = true;
           supportAmount = 300;
         }
