@@ -14,6 +14,7 @@ export default function Account() {
   const [ codeUploadResult, setCodeUploadResult ] = useState('');
   const { data: patreonData } = trpc.users.validatePatreonSupporter.useQuery();
   const { data: subscribestarData } = trpc.users.validateSubscribestarSupporter.useQuery();
+  const { data: gumroadData } = trpc.users.validateGumroadSupporter.useQuery();
   const codeUpload = trpc.users.checkGuestCode.useMutation();
   const { register, handleSubmit } = useForm<CodeSubmitForm>();
 
@@ -58,7 +59,7 @@ export default function Account() {
     <div className="p-10">
       <p className="underline m-1">{patreonData?.isLinked ? `Linked with Patreon at $${Math.round((patreonData?.supportAmount ?? 0) * 0.01)}` : <Link href={patreonAuthUrl}>Link Patreon</Link>}</p>
       <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={substarAuthUrl}>Link Subscribestar</Link>}</p>
-      <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={gumroadAuthUrl}>Link Gumroad</Link>}</p>
+      <p className="underline m-1">{gumroadData?.isLinked ? `Linked with Gumroad at $${Math.round((gumroadData?.supportAmount ?? 0) * 0.01)}` : <Link href={gumroadAuthUrl}>Link Gumroad</Link>}</p>
       <form className="outline rounded-md w-full md:w-1/3" onSubmit={handleSubmit(onSubmit)}>
         <label className="m-1" htmlFor="code">Enter guest code</label>
         <br />
