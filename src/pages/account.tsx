@@ -48,7 +48,7 @@ export default function Account() {
   const patreonAuthUrl = `https://patreon.com/oauth2/authorize?response_type=code&client_id=${patreon.client_id}&redirect_uri=${patreon.redirect_uri}`;
 
   const gumroad = {
-    client_id: env.NEXT_PUBLIC_PATREON_CLIENT_ID,
+    client_id: env.NEXT_PUBLIC_GUMROAD_CLIENT_ID,
     redirect_uri: "https://peril-comics.vercel.app/api/integrations/gumroad",
   };
   const gumroadAuthUrl = `https://gumroad.com/oauth/authorize?client_id=${gumroad.client_id}&redirect_uri=${gumroad.redirect_uri}&scope=view_profile`;
