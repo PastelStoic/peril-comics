@@ -24,8 +24,5 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
-  experimental: {
-    appDir: false,
-  }
 };
 export default config;
