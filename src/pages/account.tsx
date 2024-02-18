@@ -45,13 +45,20 @@ export default function Account() {
     redirect_uri: "https://peril-comics.vercel.app/api/integrations/patreon",
   };
   const patreonAuthUrl = `https://patreon.com/oauth2/authorize?response_type=code&client_id=${patreon.client_id}&redirect_uri=${patreon.redirect_uri}`;
-  
+
+  const gumroad = {
+    client_id: env.NEXT_PUBLIC_PATREON_CLIENT_ID,
+    redirect_uri: "https://peril-comics.vercel.app/api/integrations/gumroad",
+  };
+  const gumroadAuthUrl = `https://gumroad.com/oauth/authorize?client_id=${gumroad.client_id}&redirect_uri=${gumroad.redirect_uri}&scope=view_profile`;
+
   if (!session) return (<div>Sorry, you need to be logged in.</div>);
 
   return (
     <div className="p-10">
       <p className="underline m-1">{patreonData?.isLinked ? `Linked with Patreon at $${Math.round((patreonData?.supportAmount ?? 0) * 0.01)}` : <Link href={patreonAuthUrl}>Link Patreon</Link>}</p>
       <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={substarAuthUrl}>Link Subscribestar</Link>}</p>
+      <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={gumroadAuthUrl}>Link Gumroad</Link>}</p>
       <form className="outline rounded-md w-full md:w-1/3" onSubmit={handleSubmit(onSubmit)}>
         <label className="m-1" htmlFor="code">Enter guest code</label>
         <br />

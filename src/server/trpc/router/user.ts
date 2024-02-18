@@ -1,4 +1,4 @@
-import { checkPatreonStatus, checkSubscribestarStatus } from "src/server/externals/userpayments";
+import { checkGumroadStatus, checkPatreonStatus, checkSubscribestarStatus } from "src/server/externals/userpayments";
 import { z } from "zod";
 import { setRoleToGuest } from 'dbschema/queries';
 import { router, protectedProcedure } from "../trpc";
@@ -21,6 +21,15 @@ export const userRouter = router({
       console.log("error", error);
     }
   }),
+
+  validateGumroadSupporter: protectedProcedure
+  .query(async ({ ctx }) => {
+    try {
+      return await checkGumroadStatus(ctx.session.user.id, ctx.edgedb);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }),
   
   checkGuestCode: protectedProcedure
   .input(z.object({
@@ -28,6 +37,7 @@ export const userRouter = router({
   }))
   .mutation(async ({ctx, input}) => {
     try {
+      // yes I know I shouldn't be hardcodign this
       if (input.code === "XTPLC") {
         await setRoleToGuest(ctx.edgedb, {id: ctx.session.user.id})
         return true;

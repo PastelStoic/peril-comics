@@ -1,6 +1,8 @@
 import { getUserAccount } from 'dbschema/queries';
 import axios, { AxiosError } from 'axios';
 import type { Client } from "edgedb";
+import { env } from 'src/env/server.mjs';
+import { array } from 'zod';
 
 // need to add token refresh to both 
 
@@ -84,6 +86,44 @@ export async function checkSubscribestarStatus(userId: string, client: Client) {
   } catch (error) {
     if (error instanceof AxiosError) {
       console.log('error', `HTTP to Subscribestar failed: ${error.message}`);
+    } else {
+      console.log("error", error);
+    }
+  }
+
+  return {
+    error,
+    isLinked,
+    supportAmount,
+  };
+}
+
+/**
+ * Checks whether the user with a given id is linked, and the support amount in cents. If no user is found, or if the check fails, returns false/0.
+ */
+export async function checkGumroadStatus(userId: string, client: Client) {
+  let error: string | undefined;
+  let isLinked = false;
+  let supportAmount = 0;
+  try {
+    const productId = "wfuE1xxfZopaYT-oLXN3ag==";
+    const gumroadAccount = await getUserAccount(client, { userId, provider: "gumroad"});
+
+      isLinked = gumroadAccount !== null;
+
+      if (gumroadAccount?.access_token) {
+        const subscriberInto = await axios.get(`https://api.gumroad.com/v2/user?access_token=${gumroadAccount.access_token}`);
+        
+        const productSubscribers = await axios.get(`https://api.gumroad.com/v2/products/${productId}/subscribers?access_token=${env.GUMROAD_ACCESS_TOKEN}`);
+        // check if subscriber in subscriberas
+        if ((productSubscribers.data.subscribers as {user_email: string}[]).find(s => s.user_email === subscriberInto.data.user.email)) {
+          isLinked = true;
+          supportAmount = 300;
+        }
+    }
+  } catch (error) {
+    if (error instanceof AxiosError) {
+      console.log('error', `HTTP to Gumroad failed: ${error.message}`);
     } else {
       console.log("error", error);
     }

@@ -26,6 +26,7 @@ export const serverSchema = z.object({
   PATREON_CLIENT_SECRET: z.string(),
   GUMROAD_CLIENT_ID: z.string(),
   GUMROAD_CLIENT_SECRET: z.string(),
+  GUMROAD_ACCESS_TOKEN: z.string(),
   CLOUDFLARE_ACCOUNT_ID: z.string(),
   CLOUDFLARE_IMAGES_TOKEN: z.string(),
 });
