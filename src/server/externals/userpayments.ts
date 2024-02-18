@@ -112,11 +112,11 @@ export async function checkGumroadStatus(userId: string, client: Client) {
       isLinked = gumroadAccount !== null;
 
       if (gumroadAccount?.providerAccountId) {
+        isLinked = true;
         const productSubscribers = await axios.get(`https://api.gumroad.com/v2/products/${productId}/subscribers?access_token=${env.GUMROAD_ACCESS_TOKEN}`);
         // check if user in subscribers
         if ((productSubscribers.data.subscribers as {user_id: string}[]).find(s => s.user_id === gumroadAccount.providerAccountId)) {
-          isLinked = true;
-          supportAmount = 300;
+          supportAmount = 300; // automatically configure this somehow?
         }
     }
   } catch (error) {
