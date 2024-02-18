@@ -28,9 +28,9 @@ async function gumroadValidate(req: NextApiRequest, res: NextApiResponse) {
 
       const userData = await axios.get(`https://api.gumroad.com/v2/user?access_token=${access_token}`);
 
-      const providerAccountId = userData.data?.user?.user_id;
+      const providerAccountId = userData.data?.user?.id;
       if (!providerAccountId) {
-        console.log(`Could not get patreon user id for user ${id}`);
+        console.log(`Could not get gumroad user id for user ${id}`);
         res.redirect("/account"); // redirect with an error?
         return;
       }
