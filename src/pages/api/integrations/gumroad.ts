@@ -24,7 +24,7 @@ async function gumroadValidate(req: NextApiRequest, res: NextApiResponse) {
       if (!id) return; // throw an error?
 
       
-      const { token_type, expires_in, access_token, refresh_token, scope } = tokenData;
+      const { token_type, access_token, refresh_token, scope } = tokenData;
 
       const userData = await axios.get(`https://api.gumroad.com/v2/user?access_token=${access_token}`);
 
@@ -41,7 +41,7 @@ async function gumroadValidate(req: NextApiRequest, res: NextApiResponse) {
         id,
         provider: "gumroad",
         token_type,
-        expires_in,
+        expires_in: 1609038258,
         access_token,
         refresh_token,
         providerAccountId,
