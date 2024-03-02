@@ -72,13 +72,16 @@ export const comicRouter = router({
             ) {
               throw new TRPCError({
                 code: "UNAUTHORIZED",
-                message:
-                  `You must be a supporter at $3.00 or above to view this content. Your current support level is $${
-                    Math.round(
-                      Math.max(...supporterData.map((d) => d.supportAmount)) /
-                        100,
-                    )
-                  }.00. Your role is ${ctx.session.user.role}`,
+                message: `You must be a supporter at $Math.round(
+                    Math.max(...supporterData.map((d) => d.supportAmount)) /
+                      100,
+                  )
+                }.00 or above to view this content. Your current support level is $${
+                  Math.round(
+                    supporterPaymentMin /
+                      100,
+                  )
+                }.00. Your role is ${ctx.session.user.role}`,
               });
             }
           }
