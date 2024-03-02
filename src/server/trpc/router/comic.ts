@@ -14,7 +14,7 @@ import {
   checkSubscribestarStatus,
 } from "../../externals/userpayments";
 
-const supporterPaymentMin = 1500;
+const supporterPaymentMin = 300;
 
 export const comicRouter = router({
   search: publicProcedure
