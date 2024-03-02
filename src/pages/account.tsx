@@ -12,8 +12,6 @@ type CodeSubmitForm = {
 export default function Account() {
   const { data: session } = useSession();
   const [ codeUploadResult, setCodeUploadResult ] = useState('');
-  const { data: patreonData } = trpc.users.validatePatreonSupporter.useQuery();
-  const { data: subscribestarData } = trpc.users.validateSubscribestarSupporter.useQuery();
   const { data: gumroadData } = trpc.users.validateGumroadSupporter.useQuery();
   const codeUpload = trpc.users.checkGuestCode.useMutation();
   const { register, handleSubmit } = useForm<CodeSubmitForm>();
@@ -34,19 +32,6 @@ export default function Account() {
     }
   }
 
-  const subStar = {
-    client_id: env.NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID,
-    redirect_uri: "https://peril-comics.vercel.app/api/integrations/subscribestar",
-    scopes: "subscriber.read+user.read",
-  };
-  const substarAuthUrl = `https://subscribestar.adult/oauth2/authorize?client_id=${subStar.client_id}&redirect_uri=${subStar.redirect_uri}&response_type=code&scope=${subStar.scopes}`;
-
-  const patreon = {
-    client_id: env.NEXT_PUBLIC_PATREON_CLIENT_ID,
-    redirect_uri: "https://peril-comics.vercel.app/api/integrations/patreon",
-  };
-  const patreonAuthUrl = `https://patreon.com/oauth2/authorize?response_type=code&client_id=${patreon.client_id}&redirect_uri=${patreon.redirect_uri}`;
-
   const gumroad = {
     client_id: env.NEXT_PUBLIC_GUMROAD_CLIENT_ID,
     redirect_uri: "https://peril-comics.vercel.app/api/integrations/gumroad",
@@ -57,8 +42,6 @@ export default function Account() {
 
   return (
     <div className="p-10">
-      <p className="underline m-1">{patreonData?.isLinked ? `Linked with Patreon at $${Math.round((patreonData?.supportAmount ?? 0) * 0.01)}` : <Link href={patreonAuthUrl}>Link Patreon</Link>}</p>
-      <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={substarAuthUrl}>Link Subscribestar</Link>}</p>
       <p className="underline m-1">{gumroadData?.isLinked ? `Linked with Gumroad at $${Math.round((gumroadData?.supportAmount ?? 0) * 0.01)}` : <Link href={gumroadAuthUrl}>Link Gumroad</Link>}</p>
       <form className="outline rounded-md w-full md:w-1/3" onSubmit={handleSubmit(onSubmit)}>
         <label className="m-1" htmlFor="code">Enter guest code</label>
