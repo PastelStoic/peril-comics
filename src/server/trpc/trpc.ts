@@ -1,6 +1,9 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
-import { checkPatreonStatus, checkSubscribestarStatus } from "../externals/userpayments";
+import {
+  checkPatreonStatus,
+  checkSubscribestarStatus,
+} from "../externals/userpayments";
 
 import { type Context } from "./context";
 
@@ -18,7 +21,7 @@ export const router = t.router;
 
 /**
  * Unprotected procedure
- **/
+ */
 export const publicProcedure = t.procedure;
 
 /**
@@ -27,7 +30,7 @@ export const publicProcedure = t.procedure;
  */
 const isAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
-    throw new TRPCError({ 
+    throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You must be logged in to do that.",
     });
@@ -42,37 +45,16 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 
 /**
  * Protected procedure
- **/
-export const protectedProcedure = t.procedure.use(isAuthed);
-export const adminOnlyProcedure = t.procedure.use(isAuthed).use(({ctx, next}) => {
-  if (ctx.session.user.role !== "admin") {
-    throw new TRPCError({ 
-      code: "UNAUTHORIZED",
-      message: "Only site administrators are permitted to do that.",
-    });
-  }
-  return next();
-})
-
-/**
- * Ensures that the user is either an admin, guest, or 15$ supporter.
  */
-export const supporterOnlyProcedure = t.procedure.use(isAuthed).use(async ({ ctx, next }) => {
-  if (ctx.session.user.role === "admin" || ctx.session.user.role === "guest") {
+export const protectedProcedure = t.procedure.use(isAuthed);
+export const adminOnlyProcedure = t.procedure.use(isAuthed).use(
+  ({ ctx, next }) => {
+    if (ctx.session.user.role !== "admin") {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Only site administrators are permitted to do that.",
+      });
+    }
     return next();
-  }
-
-  const supporterData = await Promise.all([
-    checkPatreonStatus(ctx.session.user.id, ctx.edgedb), 
-    checkSubscribestarStatus(ctx.session.user.id, ctx.edgedb)
-  ]);
-  
-  if (!supporterData.some(data => data.supportAmount >= supporterPaymentMin)) {
-    throw new TRPCError({ 
-      code: "UNAUTHORIZED",
-      message: `You must be a supporter at $15.00 or above to view this content. Your current support level is $${Math.round(Math.max(...supporterData.map(d => d.supportAmount)) / 100)}.00. Your role is ${ctx.session.user.role}`
-    });
-  }
-
-  return next();
-});
+  },
+);
