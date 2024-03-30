@@ -12,7 +12,7 @@ type CodeSubmitForm = {
 export default function Account() {
   const { data: session } = useSession();
   const [ codeUploadResult, setCodeUploadResult ] = useState('');
-  const { data: gumroadData } = trpc.users.validateGumroadSupporter.useQuery();
+  const { data: subscribestarData } = trpc.users.validateSubscribestarSupporter.useQuery();
   const codeUpload = trpc.users.checkGuestCode.useMutation();
   const { register, handleSubmit } = useForm<CodeSubmitForm>();
 
@@ -32,17 +32,18 @@ export default function Account() {
     }
   }
 
-  const gumroad = {
-    client_id: env.NEXT_PUBLIC_GUMROAD_CLIENT_ID,
-    redirect_uri: "https://peril-comics.vercel.app/api/integrations/gumroad",
+  const subStar = {
+    client_id: env.NEXT_PUBLIC_SUBSCRIBESTAR_CLIENT_ID,
+    redirect_uri: "https://peril-comics.vercel.app/api/integrations/subscribestar",
+    scopes: "subscriber.read+user.read",
   };
-  const gumroadAuthUrl = `https://gumroad.com/oauth/authorize?client_id=${gumroad.client_id}&redirect_uri=${gumroad.redirect_uri}&scope=view_profile`;
+  const substarAuthUrl = `https://subscribestar.adult/oauth2/authorize?client_id=${subStar.client_id}&redirect_uri=${subStar.redirect_uri}&response_type=code&scope=${subStar.scopes}`;
 
   if (!session) return (<div>Sorry, you need to be logged in.</div>);
 
   return (
     <div className="p-10">
-      <p className="underline m-1">{gumroadData?.isLinked ? `Linked with Gumroad at $${Math.round((gumroadData?.supportAmount ?? 0) * 0.01)}` : <Link href={gumroadAuthUrl}>Link Gumroad</Link>}</p>
+      <p className="underline m-1">{subscribestarData?.isLinked ? `Linked with Subscribestar at $${Math.round((subscribestarData?.supportAmount ?? 0) * 0.01)}` : <Link href={substarAuthUrl}>Link Subscribestar</Link>}</p>
       <form className="outline rounded-md w-full md:w-1/3" onSubmit={handleSubmit(onSubmit)}>
         <label className="m-1" htmlFor="code">Enter guest code</label>
         <br />

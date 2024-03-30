@@ -63,7 +63,7 @@ export const comicRouter = router({
             ctx.session.user.role !== "guest"
           ) {
             const supporterData = await Promise.all([
-              checkGumroadStatus(ctx.session.user.id, ctx.edgedb),
+              checkSubscribestarStatus(ctx.session.user.id, ctx.edgedb),
             ]);
             if (
               !supporterData.some((data) =>
