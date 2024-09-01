@@ -67,21 +67,33 @@ export const comicRouter = router({
             ]);
             if (
               !supporterData.some((data) =>
+                data.supportAmount != null &&
                 data.supportAmount >= supporterPaymentMin
               )
             ) {
-              throw new TRPCError({
-                code: "UNAUTHORIZED",
-                message: `You must be a supporter at $Math.round(
-                    Math.max(...supporterData.map((d) => d.supportAmount)) /
+              let errorMessage;
+              // if any support exists, tell the user they don't have enough
+              // otherwise tell them they aren't currently a supporter
+              if (supporterData.some((data) => data.supportAmount != null)) {
+                errorMessage = `You must be a supporter at $${
+                  Math.round(
+                    Math.max(
+                      ...supporterData.map((d) => d.supportAmount ?? 0),
+                    ) /
                       100,
                   )
-                }.00 or above to view this content. Your current support level is $${
+                }}.00 or above to view this content. Your current support level is $${
                   Math.round(
                     supporterPaymentMin /
                       100,
                   )
-                }.00. Your role is ${ctx.session.user.role}`,
+                }.00. Your role is ${ctx.session.user.role}`;
+              } else {
+                errorMessage = "You aren't currently a supporter.";
+              }
+              throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: errorMessage,
               });
             }
           }

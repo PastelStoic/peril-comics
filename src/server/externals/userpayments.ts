@@ -63,7 +63,7 @@ export async function checkPatreonStatus(userId: string, client: Client) {
 export async function checkSubscribestarStatus(userId: string, client: Client) {
   let error: string | undefined;
   let isLinked = false;
-  let supportAmount = 0;
+  let supportAmount: number | null = 0;
   try {
     const subscribestarAccount = await getUserAccount(client, { userId, provider: "subscribestar"});
 
@@ -78,7 +78,7 @@ export async function checkSubscribestarStatus(userId: string, client: Client) {
         });
 
         if (response.status === 200) {
-          supportAmount = response.data?.data?.subscriber?.subscription?.price;
+          supportAmount = response.data?.data?.subscriber?.subscription?.price ?? null;
         } else if (response.status === 401) {
           error = "Failed to access account information.";
         }
