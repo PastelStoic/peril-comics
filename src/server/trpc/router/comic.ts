@@ -77,14 +77,14 @@ export const comicRouter = router({
               if (supporterData.some((data) => data.supportAmount != null)) {
                 errorMessage = `You must be a supporter at $${
                   Math.round(
-                    Math.max(
-                      ...supporterData.map((d) => d.supportAmount ?? 0),
-                    ) /
+                    supporterPaymentMin /
                       100,
                   )
                 }.00 or above to view this content. Your current support level is $${
                   Math.round(
-                    supporterPaymentMin /
+                    Math.max(
+                      ...supporterData.map((d) => d.supportAmount ?? 0),
+                    ) /
                       100,
                   )
                 }.00. Your role is ${ctx.session.user.role}`;
