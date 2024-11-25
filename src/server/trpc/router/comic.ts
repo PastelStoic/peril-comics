@@ -82,7 +82,7 @@ export const comicRouter = router({
                     ) /
                       100,
                   )
-                }}.00 or above to view this content. Your current support level is $${
+                }.00 or above to view this content. Your current support level is $${
                   Math.round(
                     supporterPaymentMin /
                       100,
